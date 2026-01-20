@@ -25,26 +25,26 @@ interface SidebarProps {
 
 const navigation: NavigationItem[] = [
   { id: "dashboard", icon: <FaChartLine />, label: "Dashboard", href: "/admin" },
-  {
-    id: "financial",
-    icon: <FaMoneyBillWave />,
-    label: "Laporan Keuangan",
-    href: "/admin/financial",
-  },
+  // {
+  //   id: "financial",
+  //   icon: <FaMoneyBillWave />,
+  //   label: "Laporan Keuangan",
+  //   href: "/admin/financial",
+  // },
   { id: "menu", icon: <FaUtensils />, label: "Kelola Menu", href: "/admin/menu" },
-  {
-    id: "customers",
-    icon: <FaUsers />,
-    label: "Pelanggan",
-    href: "/admin/customers",
-  },
+  // {
+  //   id: "customers",
+  //   icon: <FaUsers />,
+  //   label: "Pelanggan",
+  //   href: "/admin/customers",
+  // },
   { id: "orders", icon: <FaFileInvoice />, label: "Pesanan", href: "/admin/orders" },
-  {
-    id: "notifications",
-    icon: <FaBell />,
-    label: "Notifikasi",
-    href: "/admin/notifications",
-  },
+  // {
+  //   id: "notifications",
+  //   icon: <FaBell />,
+  //   label: "Notifikasi",
+  //   href: "/admin/notifications",
+  // },
   { id: "gallery", icon: <FaImages />, label: "Galeri", href: "/admin/gallery" },
   {
     id: "testimonials",

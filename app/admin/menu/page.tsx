@@ -16,11 +16,7 @@ import {
 import { toast } from "react-toastify";
 import axiosInstance from "@/lib/axiosInstance";
 
-// Tipe untuk kategori, diambil dari endpoint /categories
-export interface Category {
-  categoryId: string;
-  name: string;
-}
+
 
 // Tipe MenuItem yang sesuai dengan backend
 export interface MenuItem {
@@ -31,7 +27,6 @@ export interface MenuItem {
   image: string;
   isAvailable: boolean;
   isFavorite: boolean;
-  category: Category; // Relasi ke kategori
 }
 
 export default function MenuManagement() {
@@ -45,9 +40,6 @@ export default function MenuManagement() {
   const itemsPerPage = 10;
 
   console.log("data menu", filteredMenuItems)
-  // --- States untuk Kategori ---
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
 
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,21 +50,7 @@ export default function MenuManagement() {
 
   // --- API Calls ---
 
-  // 1. Fungsi untuk mengambil data kategori
-  const fetchCategories = async () => {
-    try {
-      setIsCategoriesLoading(true);
-      const response = await axiosInstance.get<{ message: string; data: Category[] }>('/categories');
-      setCategories(response.data.data || []);
-      
-    } catch (error) {
-      toast.error('Gagal memuat data kategori.');
-      console.error(error);
-      setCategories([]); // Pastikan state tetap array
-    } finally {
-      setIsCategoriesLoading(false);
-    }
-  };
+
 
   // 2. Fungsi untuk mengambil data menu
   const fetchMenuItems = async () => {
@@ -94,7 +72,6 @@ export default function MenuManagement() {
 
   // useEffect untuk memanggil fetch data saat komponen dimuat
   useEffect(() => {
-    fetchCategories();
     fetchMenuItems();
   }, []); // <-- Hanya satu useEffect yang diperlukan untuk fetch awal
 
@@ -114,7 +91,7 @@ export default function MenuManagement() {
 
   const handleSave = async () => {
     // Validasi 1: Field wajib
-    if (!formData.name || !formData.description || !formData.category?.categoryId) {
+    if (!formData.name || !formData.description) {
       toast.error("Mohon lengkapi semua field yang diperlukan.");
       return;
     }
@@ -137,7 +114,6 @@ export default function MenuManagement() {
     data.append('name', formData.name);
     data.append('description', formData.description);
     data.append('price', String(priceValue));
-    data.append('categoryId', formData.category.categoryId);
     data.append('isFavorite', String(!!formData.isFavorite));
     data.append('isAvailable', String(!!formData.isAvailable));
 
@@ -174,13 +150,11 @@ export default function MenuManagement() {
   // --- Modal & Form Handlers ---
   const openAddModal = () => {
     setSelectedMenuItem(null);
-    // Gunakan kategori pertama dari data yang sudah di-fetch, atau fallback ke objek kosong
-    const defaultCategory = categories.length > 0 ? categories[0] : { categoryId: '', name: 'Tidak Ada Kategori' };
+    
     setFormData({
       name: "",
       description: "",
       price: 0,
-      category: defaultCategory,
       isFavorite: false,
       isAvailable: true,
     });
@@ -199,18 +173,18 @@ export default function MenuManagement() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
-    const checked = type === "checkbox" ? (e.target as HTMLInputElement).checked : undefined;
 
-    if (name === 'categoryId') {
-      const selectedCategory = categories.find(cat => cat.categoryId === value);
-      setFormData(prev => ({ ...prev, category: selectedCategory }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: type === "checkbox" ? checked : value,
-      }));
-    }
+    setFormData(prev => ({
+      ...prev,
+      [name]:
+        type === "checkbox"
+          ? (e.target as HTMLInputElement).checked
+          : name === "price"
+            ? value === "" ? "" : Number(value)   // <-- penting untuk harga
+            : value,
+    }));
   };
+
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -220,7 +194,7 @@ export default function MenuManagement() {
       setFormData(prev => ({ ...prev, image: objectUrl }));
     }
   };
-  
+
   const closeModal = () => {
     // --- PERBAIKAN: Cegah memory leak ---
     if (formData.image && formData.image.startsWith('blob:')) {
@@ -244,8 +218,7 @@ export default function MenuManagement() {
       const filtered = menuItems.filter(
         (item) =>
           item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.category.name.toLowerCase().includes(searchTerm.toLowerCase())
+          item.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredMenuItems(filtered);
     }
@@ -299,7 +272,7 @@ export default function MenuManagement() {
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gambar</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
+                  
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Favorit</th>
@@ -318,7 +291,7 @@ export default function MenuManagement() {
                         <div className="text-sm font-medium text-gray-900">{item.name}</div>
                         <div className="text-sm text-gray-500">{item.description.substring(0, 30)}...</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.category?.name}</td>
+                     
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Rp {item.price.toLocaleString("id-ID")}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.isAvailable ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
@@ -353,7 +326,7 @@ export default function MenuManagement() {
       {/* Modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={closeModal}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={closeModal}>
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <div className="p-6 border-b border-gray-200">
                 <div className="flex justify-between items-center">
@@ -389,25 +362,22 @@ export default function MenuManagement() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
-                    <input type="number" name="price" value={formData.price || 0} onChange={handleInputChange} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                    <select 
-                      name="categoryId" 
-                      value={formData.category?.categoryId || ''} 
-                      onChange={handleInputChange} 
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" 
+                    <input
+                      type="number"
+                      name="price"
+                      value={formData.price ?? ""}
+                      onChange={handleInputChange}
+                      onFocus={(e) => {
+                        if (formData.price === 0) {
+                          setFormData(prev => ({ ...prev, price: "" as any }));
+                        }
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                       required
-                      disabled={isCategoriesLoading}
-                    >
-                      {isCategoriesLoading ? (
-                        <option>Memuat kategori...</option>
-                      ) : (
-                        categories.map(cat => <option key={cat.categoryId} value={cat.categoryId}>{cat.name}</option>)
-                      )}
-                    </select>
+                    />
+
                   </div>
+                  
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center">

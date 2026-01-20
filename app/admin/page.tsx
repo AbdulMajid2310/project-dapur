@@ -7,8 +7,6 @@ import {
   FaUsers,
   FaUtensils,
 } from "react-icons/fa";
-import { initialNotifications } from "@/lib/data";
-import AdminLayout from "./layout";
 
 interface DashboardCardProps {
   title: string;

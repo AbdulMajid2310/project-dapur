@@ -47,7 +47,7 @@ export default function WartegLanding() {
       {/* Navbar */}
       <Navbar />
 
-      {/* Konten halaman, beri padding-top sesuai tinggi navbar (misal 16 = 64px) */}
+   
       <div className="bg-[#9C633D] w-full pt-16 text-gray-700">
         <div className="max-w-7xl mx-auto">
           {/* Hero Section */}
@@ -66,7 +66,7 @@ export default function WartegLanding() {
           {/* Other Sections */}
           <TestimonialsSection />
           <FAQSection />
-          <ContactSection />
+          {/* <ContactSection /> */}
           <GallerySection />
         </div>
       </div>

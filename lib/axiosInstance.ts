@@ -38,7 +38,12 @@ axiosInstance.interceptors.response.use(
 
     const originalRequest = axiosError.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    if (axiosError.response.status === 401 && !originalRequest._retry) {
+    // ❌ Jangan refresh token untuk /auth/login
+    if (
+      axiosError.response.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/login')
+    ) {
       if (isRefreshing) {
         return new Promise<void>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -62,8 +67,9 @@ axiosInstance.interceptors.response.use(
       }
     }
 
-    return Promise.reject(error);
+    return Promise.reject(error); // login gagal tetap ke catch di useAuth
   }
 );
+
 
 export default axiosInstance;

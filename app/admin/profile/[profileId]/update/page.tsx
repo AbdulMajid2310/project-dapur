@@ -21,9 +21,6 @@ interface ProfileForm {
   operatingHours: string;
   phone: string;
   email: string;
-  minOrder: number;
-  deliveryFee: number;
-  deliveryTime: string;
   socialMedia: SocialMediaInput[];
 }
 
@@ -80,9 +77,6 @@ export default function ProfileUpdate() {
     operatingHours: "",
     phone: "",
     email: "",
-    minOrder: 0,
-    deliveryFee: 0,
-    deliveryTime: "",
     socialMedia: [],
   });
 
@@ -107,9 +101,6 @@ export default function ProfileUpdate() {
         operatingHours: profile.operatingHours || "",
         phone: profile.phone || "",
         email: profile.email || "",
-        minOrder: profile.minOrder || 0,
-        deliveryFee: profile.deliveryFee || 0,
-        deliveryTime: profile.deliveryTime || "",
         socialMedia: profile.socialMedias || [],
       });
 
@@ -392,46 +383,7 @@ export default function ProfileUpdate() {
         </div>
       </div>
 
-      {/* ===== PENGATURAN LAYANAN ===== */}
-      <div className="bg-white rounded-xl p-6 shadow-md">
-        <h3 className="text-lg font-bold text-gray-800 mb-4">Pengaturan Layanan</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* ... (Input fields untuk Pengaturan Layanan) ... */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Minimal Order (Rp)</label>
-            <input
-              type="number"
-              name="minOrder"
-              value={formData.minOrder}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500"
-              placeholder="10000"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Biaya Antar (Rp)</label>
-            <input
-              type="number"
-              name="deliveryFee"
-              value={formData.deliveryFee}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500"
-              placeholder="5000"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Estimasi Waktu Antar</label>
-            <input
-              type="text"
-              name="deliveryTime"
-              value={formData.deliveryTime}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500"
-              placeholder="30-45 menit"
-            />
-          </div>
-        </div>
-      </div>
+     
 
       {/* ===== MEDIA SOSIAL ===== */}
       <div className="bg-white rounded-xl p-6 shadow-md">

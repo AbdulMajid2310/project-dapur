@@ -23,9 +23,6 @@ interface Profile {
   operatingHours: string;
   address: string;
   description: string;
-  minOrder: number;
-  deliveryFee: number;
-  deliveryTime: string;
   socialMedias: SocialMedia[];
   logo: string | null;
   coverImage: string | null;
@@ -219,40 +216,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-        <h3 className="text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">
-          Pengaturan Layanan
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Minimal Order (Rp)
-            </label>
-            <p className="text-gray-800 font-medium bg-gray-50 p-2 rounded">
-              Rp {profile.minOrder.toLocaleString("id-ID")}
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Biaya Antar (Rp)
-            </label>
-            <p className="text-gray-800 font-medium bg-gray-50 p-2 rounded">
-              Rp {profile.deliveryFee.toLocaleString("id-ID")}
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Estimasi Waktu Antar
-            </label>
-            <p className="text-gray-800 font-medium bg-gray-50 p-2 rounded">
-              {profile.deliveryTime}
-            </p>
-          </div>
-        </div>
-      </div>
 
       <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
         <h3 className="text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">Media Sosial</h3>

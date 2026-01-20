@@ -201,125 +201,152 @@ export default function GalleryManagement() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
           onClick={closeModal}
         >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex justify-between items-center">
-                <h3 className="text-xl font-bold text-gray-800">
-                  {selectedGalleryItem?.galleryId ? "Edit Gambar" : "Tambah Gambar Baru"}
-                </h3>
-                <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
-                  <FaTimes />
-                </button>
-              </div>
-            </div>
+        <motion.div
+  initial={{ scale: 0.9, opacity: 0 }}
+  animate={{ scale: 1, opacity: 1 }}
+  exit={{ scale: 0.9, opacity: 0 }}
+  className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] scrollbar-hide overflow-y-auto"
+  onClick={(e) => e.stopPropagation()}
+>
+  <div className="p-6 border-b border-gray-200">
+    <div className="flex justify-between items-center">
+      <h3 className="text-xl font-bold text-gray-800">
+        {selectedGalleryItem?.galleryId ? "Edit Gambar" : "Tambah Gambar Baru"}
+      </h3>
+      <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
+        <FaTimes />
+      </button>
+    </div>
+  </div>
 
-            <div className="p-6 space-y-4">
-              {/* Image Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Gambar</label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400 transition-colors"
-                >
-                  {selectedGalleryItem?.imageUrl || selectedFile ? (
-                    <img
-                      src={selectedGalleryItem?.imageUrl || ''}
-                      alt="Preview"
-                      className="max-h-64 rounded-md object-contain"
-                    />
-                  ) : (
-                    <div className="space-y-1 text-center">
-                      <FaCloudUploadAlt className="mx-auto h-12 w-12 text-gray-400" />
-                      <p className="text-sm text-gray-600">Klik untuk upload gambar</p>
-                    </div>
-                  )}
-                </div>
-              </div>
+  <div className="p-6 space-y-4">
+    {/* Image Upload */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">Gambar</label>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageUpload}
+        className="hidden"
+      />
+      <div
+        onClick={() => fileInputRef.current?.click()}
+        className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400 transition-colors"
+      >
+        {selectedGalleryItem?.imageUrl || selectedFile ? (
+          <img
+            src={selectedGalleryItem?.imageUrl || ''}
+            alt="Preview"
+            className="max-h-64 rounded-md object-contain"
+          />
+        ) : (
+          <div className="space-y-1 text-center">
+            <FaCloudUploadAlt className="mx-auto h-12 w-12 text-gray-400" />
+            <p className="text-sm text-gray-600">
+              Klik untuk upload gambar (JPG, PNG, atau WEBP)
+            </p>
+            <p className="text-xs text-gray-400">
+              Ukuran maksimal disarankan &lt; 5MB
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
 
-              {/* Form Fields */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Judul</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={selectedGalleryItem?.title || ''}
-                  onChange={handleGalleryChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  required
-                />
-              </div>
+    {/* Judul */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">Judul</label>
+      <input
+        type="text"
+        name="title"
+        value={selectedGalleryItem?.title || ''}
+        onChange={handleGalleryChange}
+        placeholder="Masukkan judul gambar"
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+        required
+      />
+    </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Alt Text</label>
-                <input
-                  type="text"
-                  name="alt"
-                  value={selectedGalleryItem?.alt || ''}
-                  onChange={handleGalleryChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
+    {/* Alt Text */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">Alt Text</label>
+      <input
+        type="text"
+        name="alt"
+        value={selectedGalleryItem?.alt || ''}
+        onChange={handleGalleryChange}
+        placeholder="Contoh: Foto menu nasi goreng spesial"
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+      />
+      <p className="text-xs text-gray-400 mt-1">
+        Digunakan untuk aksesibilitas dan SEO
+      </p>
+    </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Caption</label>
-                <textarea
-                  name="caption"
-                  value={selectedGalleryItem?.caption || ''}
-                  onChange={handleGalleryChange}
-                  rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  required
-                />
-              </div>
+    {/* Caption */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">Caption</label>
+      <textarea
+        name="caption"
+        value={selectedGalleryItem?.caption || ''}
+        onChange={handleGalleryChange}
+        rows={3}
+        placeholder="Tulis keterangan gambar di sini..."
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+        required
+      />
+    </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                <select
-                  name="category"
-                  value={selectedGalleryItem?.category || 'Makanan'}
-                  onChange={handleGalleryChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  required
-                >
-                  <option value="Makanan">Makanan</option>
-                  <option value="Minuman">Minuman</option>
-                  <option value="Interior">Interior</option>
-                  <option value="Tim">Tim</option>
-                  <option value="Lainnya">Lainnya</option>
-                </select>
-              </div>
-            </div>
+    {/* Kategori */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+      <select
+        name="category"
+        value={selectedGalleryItem?.category || ''}
+        onChange={handleGalleryChange}
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+        required
+      >
+        <option value="" disabled>
+          -- Pilih Kategori --
+        </option>
+        <option value="Makanan">Makanan</option>
+        <option value="Minuman">Minuman</option>
+        <option value="Interior">Interior</option>
+        <option value="Tim">Tim</option>
+        <option value="Lainnya">Lainnya</option>
+      </select>
+    </div>
+  </div>
 
-            <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
-              <button onClick={closeModal} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50" disabled={isSubmitting}>
-                Batal
-              </button>
-              <button
-                onClick={saveGalleryItem}
-                className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex items-center disabled:opacity-50"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? <FaSpinner className="animate-spin mr-2" /> : <FaSave className="mr-2" />}
-                Simpan
-              </button>
-            </div>
-          </motion.div>
+  <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
+    <button
+      onClick={closeModal}
+      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+      disabled={isSubmitting}
+    >
+      Batal
+    </button>
+
+    <button
+      onClick={saveGalleryItem}
+      className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex items-center disabled:opacity-50"
+      disabled={isSubmitting}
+    >
+      {isSubmitting ? (
+        <FaSpinner className="animate-spin mr-2" />
+      ) : (
+        <FaSave className="mr-2" />
+      )}
+      Simpan
+    </button>
+  </div>
+</motion.div>
+
         </motion.div>
       )}
     </AnimatePresence>
@@ -367,7 +394,7 @@ export default function GalleryManagement() {
                     <img src={item.imageUrl} alt={item.alt} className="w-full h-full object-cover" />
                   </div>
                   <div className="p-4">
-                    <h3 className="font-medium text-gray-800 mb-1">{item.title}</h3>
+                    <h3 className="font-medium text-gray-800 capitalize mb-1">{item.title}</h3>
                     <p className="text-sm text-gray-500 mb-2">{item.caption}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">{item.category}</span>

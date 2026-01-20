@@ -3,6 +3,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { FaStar, FaPlus, FaChevronRight } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 // =====================
 // TYPES
@@ -102,10 +103,9 @@ export default function FavoriteMenu() {
         quantity: 1,
       });
 
-      alert("Berhasil menambahkan ke pesanan!");
+      toast("Berhasil menambahkan ke pesanan!");
     } catch (err: any) {
-      console.error("Gagal menambahkan ke pesanan:", err);
-      alert(err.response?.data?.message || "Gagal menambahkan ke pesanan.");
+      toast.error( "Gagal menambahkan ke pesanan.");
     } finally {
       setAddingToCart(null);
     }

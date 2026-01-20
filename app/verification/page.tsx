@@ -1,62 +1,107 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react"; // Tambahkan useState
 import { useRouter } from "next/navigation";
-import { FaSpinner, FaShieldAlt } from "react-icons/fa";
+import { FaSpinner, FaShieldAlt, FaCheckCircle } from "react-icons/fa"; // Tambahkan FaCheckCircle
 import { useAuth } from "@/lib/hooks/useAuth";
 
 export default function VerificationPage() {
-  const { user, userLoading, error } = useAuth();
+  const { user, userLoading } = useAuth();
   const router = useRouter();
+  // State untuk mengontrol animasi sukses
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  console.log("User Data:", user?.userId);
   useEffect(() => {
-    if (user?.role) {
+    // Jika user sudah ada dan tidak dalam proses loading
+    if (user && !userLoading) {
+      // Tampilkan animasi sukses dulu
+      setShowSuccess(true);
+
+      // Setelah 2 detik, alihkan pengguna
       const timer = setTimeout(() => {
         if (user.role === "admin") {
           router.push("/admin");
         } else {
           router.push("/");
         }
-      }, 2000); // 2 detik biar efek loading terlihat
+      }, 2000);
 
       return () => clearTimeout(timer);
     }
-  }, [user, router]);
+  }, [user, userLoading, router]);
 
+  // --- Tampilan Saat Memuat Data User ---
   if (userLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-        <FaShieldAlt className="text-blue-500 text-6xl mb-4 animate-pulse" />
-        <FaSpinner className="animate-spin text-blue-500 text-4xl mb-4" />
-        <h2 className="text-xl font-semibold">Verifying your account...</h2>
-        <p className="text-gray-500 text-sm mt-2">
-          Please wait a moment
-        </p>
-      </div>
-    );
-  }
+      <div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-br from-green-50 to-emerald-100">
+        <div className="p-8 bg-white rounded-2xl shadow-xl flex flex-col items-center text-center">
+          {/* Ikon Sukses dengan Animasi Scale-In */}
+          <FaCheckCircle className="text-green-500 text-6xl mb-4 animate-scale-in" />
 
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-        <div className="bg-white shadow-md rounded-xl p-6 text-center">
-          <p className="text-red-500 mb-4">{error}</p>
-          <button
-            onClick={() => router.push("/login")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Back to Login
-          </button>
+          {/* Teks Sukses */}
+          <h2 className="text-2xl font-bold text-gray-800 mb-2 animate-fade-in">
+            Verifikasi Berhasil!
+          </h2>
+          <p className="text-gray-600 animate-fade-in">
+            Mengalihkan Anda ke dashboard...
+          </p>
+          
+          {/* Logo (opsional, bisa ditampilkan atau tidak) */}
+          <div className="h-24 w-24 mt-6 opacity-50">
+            <img src="/images/logo.png" alt="logo" className="w-full h-full object-contain" />
+          </div>
         </div>
       </div>
     );
   }
 
+  // --- Tampilan Setelah User Diverifikasi ---
+  // Kita hanya menampilkan ini jika user ada dan state showSuccess sudah true
+  if (user && showSuccess) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-br from-green-50 to-emerald-100">
+        <div className="p-8 bg-white rounded-2xl shadow-xl flex flex-col items-center text-center">
+          {/* Ikon Sukses dengan Animasi Scale-In */}
+          <FaCheckCircle className="text-green-500 text-6xl mb-4 animate-scale-in" />
+
+          {/* Teks Sukses */}
+          <h2 className="text-2xl font-bold text-gray-800 mb-2 animate-fade-in">
+            Verifikasi Berhasil!
+          </h2>
+          <p className="text-gray-600 animate-fade-in">
+            Mengalihkan Anda ke dashboard...
+          </p>
+          
+          {/* Logo (opsional, bisa ditampilkan atau tidak) */}
+          <div className="h-24 w-24 mt-6 opacity-50">
+            <img src="/images/logo.png" alt="logo" className="w-full h-full object-contain" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Fallback (seharusnya tidak terlalu lama terlihat) ---
+  // Ini adalah tampilan jika user belum ada dan bukan dalam proses loading
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-      <FaSpinner className="animate-spin text-blue-500 text-4xl mb-4" />
-      <h2 className="text-xl font-semibold">Redirecting...</h2>
-    </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-br from-blue-50 to-indigo-100">
+        <div className="flex flex-col items-center">
+          {/* Logo dengan animasi pulse */}
+          <div className="h-40 w-40 mb-6 animate-pulse-slow">
+            <img src="/images/logo.png" alt="logo" className="w-full h-full object-contain" />
+          </div>
+
+          {/* Spinner Ikon */}
+          <FaSpinner className="animate-spin text-blue-500 text-4xl mb-4" />
+
+          {/* Teks Verifikasi */}
+          <p className="text-gray-700 text-lg font-medium animate-fade-in">
+            Memverifikasi identitas Anda...
+          </p>
+        </div>
+      </div>
+      
   );
+  
 }
+

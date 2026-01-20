@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { FaUtensils, FaStar, FaSearch, FaChevronLeft, FaChevronRight, FaPlus } from "react-icons/fa";
 import axiosInstance from "@/lib/axiosInstance";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { toast } from "react-toastify";
 
 // =====================
 // TYPES
@@ -125,10 +126,10 @@ export default function AllMenu() {
         quantity: 1,
       });
 
-      alert("Berhasil menambahkan ke pesanan!");
+      toast("Berhasil menambahkan ke pesanan!");
     } catch (err: any) {
-      console.error("Gagal menambahkan ke pesanan:", err);
-      alert(err.response?.data?.message || "Gagal menambahkan ke pesanan.");
+      toast.error("Gagal menambahkan ke pesanan:", err);
+    
     } finally {
       setAddingToCart(null);
     }

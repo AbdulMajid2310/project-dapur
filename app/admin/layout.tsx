@@ -1,11 +1,13 @@
 // components/AdminLayout.tsx
 "use client";
 import { useState, ReactNode, useEffect } from "react"; // ✅ tambah useEffect
-import { FaHome, FaBell } from "react-icons/fa";
+import { FaHome, FaBell, FaUserCircle } from "react-icons/fa";
 import Sidebar from "./Sidebar";
 import { Notification, PageTitle } from "../../lib/types";
 import { usePathname, useRouter } from "next/navigation"; // ✅ tambah useRouter
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useUsers } from "@/lib/hooks/user/useUsers";
+import Image from "next/image";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -17,9 +19,17 @@ export default function AdminLayout({
   notifications,
 }: AdminLayoutProps) {
   const router = useRouter(); // ✅
-  const { userLoading, user } = useAuth(); // ✅ sesuaikan dengan hook kamu
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { userLoading, user, logout } = useAuth(); // ✅ sesuaikan dengan hook kamu
+  const [profileOpen, setProfileOpen] = useState(false);
 
+  const { userDetail, getUserDetail } = useUsers();
+
+  useEffect(() => {
+    if (user?.userId) {
+      getUserDetail(user.userId);
+    }
+  }, [user?.userId]);
   const pathname = usePathname();
 
   // ✅ PROTEKSI ROUTE ADMIN
@@ -115,6 +125,18 @@ export default function AdminLayout({
     );
   }
 
+  const handleLogout = async () => {
+    try {
+      await logout()
+
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed", error);
+      router.push("/login");
+    }
+  };
+
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-700">
       <div className="flex h-screen overflow-hidden">
@@ -159,25 +181,65 @@ export default function AdminLayout({
                 )}
               </button>
 
-              <div className="flex items-center space-x-2">
-                <div className="w-10 h-10 rounded-full overflow-hidden">
-                  <img
-                    src="/images/product/eat2.jpeg"
-                    alt="Admin"
-                    width={40}
-                    height={40}
-                    className="object-cover w-full h-full"
-                  />
-                </div>
+              <div className="relative flex items-center space-x-2">
+                {/* AVATAR BUTTON */}
+                <button
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="w-10 h-10 rounded-full overflow-hidden focus:outline-none ring-2 ring-gray-200"
+                >
+                  {userDetail?.avatar ? (
+                    <Image
+                      src={userDetail.avatar}
+                      alt="Admin"
+                      height={40}
+                      width={40}
+                      className="object-cover h-full w-full "
+                      unoptimized
+                    />
+                  ) : (
+                    <FaUserCircle className="w-8 h-8 text-gray-400" />
+                  )}
+                </button>
+
                 <div className="hidden sm:block">
-                  <p className="font-medium text-gray-800">
-                    Abdul Majid
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {user?.role}
+                  <p className="font-medium capitalize text-gray-800">
+                    {userDetail?.firstName} {userDetail?.lastName}
                   </p>
                 </div>
+
+                {/* DROPDOWN MENU */}
+                {profileOpen && (
+                  <div className="absolute right-0 top-12 w-48 bg-white shadow-lg rounded-lg border border-gray-100 z-50">
+                    <div className="px-4 py-3 border-b">
+                      <p className="text-sm font-semibold text-gray-800">
+                        {userDetail?.firstName} {userDetail?.lastName}
+                      </p>
+                      <p className="text-xs text-gray-500">{userDetail?.email}</p>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setProfileOpen(false);
+                        router.push("/admin/profile");
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                    >
+                      👤 Profile
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setProfileOpen(false);
+                        handleLogout();
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                    >
+                      🚪 Keluar
+                    </button>
+                  </div>
+                )}
               </div>
+
             </div>
           </div>
 
