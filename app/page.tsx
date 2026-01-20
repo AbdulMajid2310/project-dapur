@@ -16,29 +16,36 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { useEffect } from "react";
 
 export default function WartegLanding() {
-   const router = useRouter(); // ✅
-    const { userLoading, user } = useAuth(); 
+  const router = useRouter(); // ✅
+  const { userLoading, user } = useAuth();
 
-      // ✅ PROTEKSI ROUTE ADMIN
-      useEffect(() => {
-        if (!userLoading) {
-          // kalau tidak ada user → ke login
-          if (!user) {
-            router.push("/login");
-            return;
-          }
-    
-          // kalau ada user tapi bukan admin → ke login (atau /unauthorized)
-          if (user?.role !== "customer") {
-            router.push("/login");
-          }
-        }
-      }, [user, userLoading, router]);
+  // ✅ PROTEKSI ROUTE ADMIN
+  useEffect(() => {
+    if (!userLoading) {
+      // kalau tidak ada user → ke login
+      if (!user) {
+        router.push("/login");
+        return;
+      }
 
-      if (userLoading) {
+      // kalau ada user tapi bukan admin → ke login (atau /unauthorized)
+      if (user?.role !== "customer") {
+        router.push("/login");
+      }
+    }
+  }, [user, userLoading, router]);
+
+  if (userLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p>Loading...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-br from-green-50 to-emerald-100">
+        <div className="p-8 bg-white rounded-2xl shadow-xl flex flex-col items-center text-center">
+
+
+          {/* Logo (opsional, bisa ditampilkan atau tidak) */}
+          <div className="h-24 w-24 mt-6 opacity-50">
+            <img src="/images/logo.png" alt="logo" className="w-full h-full object-contain" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -47,7 +54,7 @@ export default function WartegLanding() {
       {/* Navbar */}
       <Navbar />
 
-   
+
       <div className="bg-[#9C633D] w-full pt-16 text-gray-700">
         <div className="max-w-7xl mx-auto">
           {/* Hero Section */}

@@ -122,16 +122,16 @@ export default function UserProfile() {
               {!isEditing ? (
                 <div className="max-w-lg mx-auto  p-6 flex flex-col  text-center">
                   <div className="grid grid-cols-2 gap-4">
-<div className="flex justify-center items-center">
+                    <div className="flex justify-center items-center">
 
-                    <div className="relative w-40 h-40 mb-4">
-                      <img
-                        src={userData.avatar}
-                        alt="Avatar"
-                        className="w-full h-full rounded-full object-cover border-4 border-orange-400 shadow-md"
-                      />
+                      <div className="relative w-40 h-40 mb-4">
+                        <img
+                          src={userData.avatar}
+                          alt="Avatar"
+                          className="w-full h-full rounded-full object-cover border-4 border-orange-400 shadow-md"
+                        />
+                      </div>
                     </div>
-</div>
 
                     <div>
 

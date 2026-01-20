@@ -29,7 +29,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="bg-white p-8 rounded-xl shadow-lg">
+        <div className="">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <input
