@@ -16,8 +16,6 @@ import {
 import { toast } from "react-toastify";
 import axiosInstance from "@/lib/axiosInstance";
 
-
-
 // Tipe MenuItem yang sesuai dengan backend
 export interface MenuItem {
   menuItemId: string;
@@ -49,8 +47,6 @@ export default function MenuManagement() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // --- API Calls ---
-
-
 
   // 2. Fungsi untuk mengambil data menu
   const fetchMenuItems = async () => {
@@ -114,34 +110,60 @@ export default function MenuManagement() {
     data.append('name', formData.name);
     data.append('description', formData.description);
     data.append('price', String(priceValue));
-    data.append('isFavorite', String(!!formData.isFavorite));
-    data.append('isAvailable', String(!!formData.isAvailable));
+    
+ if (formData.isFavorite !== undefined) {
+    data.append('isFavorite', formData.isFavorite ? 'true' : 'false');
+  }
+  if (formData.isAvailable !== undefined) {
+    data.append('isAvailable', formData.isAvailable ? 'true' : 'false');
+  }
+
+    // Log data yang akan dikirim
+    console.log("Data yang akan dikirim:", {
+      name: formData.name,
+      description: formData.description,
+      price: String(priceValue),
+      isFavorite: String(!!formData.isFavorite),
+      isAvailable: String(!!formData.isAvailable),
+      hasImage: !!selectedFile
+    });
 
     if (selectedFile) {
       data.append('image', selectedFile);
     }
 
     try {
+      let response;
       if (selectedMenuItem) {
-        await axiosInstance.put(`/menu-items/${selectedMenuItem.menuItemId}`, data, {
+        console.log("Mengupdate menu dengan ID:", selectedMenuItem.menuItemId);
+        response = await axiosInstance.put(`/menu-items/${selectedMenuItem.menuItemId}`, data, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
+        console.log("Response dari update:", response);
         toast.success('Menu berhasil diperbarui!');
       } else {
-        await axiosInstance.post('/menu-items', data, {
+        console.log("Menambah menu baru");
+        response = await axiosInstance.post('/menu-items', data, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
+        console.log("Response dari tambah:", response);
         toast.success('Menu berhasil ditambahkan!');
       }
       setIsModalOpen(false);
-      fetchMenuItems();
+      // Tunggu sebentar sebelum fetch ulang untuk memastikan server sudah memproses data
+      setTimeout(() => {
+        fetchMenuItems();
+      }, 500);
     } catch (error: any) {
+      console.error("Error saat menyimpan:", error);
+      if (error.response) {
+        console.error("Response error:", error.response);
+      }
       if (error.response?.data?.message && Array.isArray(error.response.data.message)) {
         toast.error(error.response.data.message.join(', '));
       } else {
         toast.error(error.response?.data?.message || 'Gagal menyimpan menu.');
       }
-      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -163,8 +185,14 @@ export default function MenuManagement() {
   };
 
   const openEditModal = (item: MenuItem) => {
+    console.log("Membuka modal edit untuk item:", item);
     setSelectedMenuItem(item);
-    setFormData(item);
+    setFormData({
+      ...item,
+      // Pastikan nilai boolean tetap boolean
+      isFavorite: Boolean(item.isFavorite),
+      isAvailable: Boolean(item.isAvailable)
+    });
     setSelectedFile(null);
     setIsModalOpen(true);
   };
@@ -173,22 +201,27 @@ export default function MenuManagement() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
+    console.log("Input changed:", { name, value, type });
 
-    setFormData(prev => ({
-      ...prev,
-      [name]:
-        type === "checkbox"
-          ? (e.target as HTMLInputElement).checked
-          : name === "price"
-            ? value === "" ? "" : Number(value)   // <-- penting untuk harga
-            : value,
-    }));
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]:
+          type === "checkbox"
+            ? (e.target as HTMLInputElement).checked
+            : name === "price"
+              ? value === "" ? "" : Number(value)
+              : value,
+      };
+      console.log("Form data updated:", newData);
+      return newData;
+    });
   };
-
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      console.log("File selected:", file);
       setSelectedFile(file);
       const objectUrl = URL.createObjectURL(file);
       setFormData(prev => ({ ...prev, image: objectUrl }));
@@ -381,11 +414,25 @@ export default function MenuManagement() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center">
-                    <input type="checkbox" id="isFavorite" name="isFavorite" checked={formData.isFavorite || false} onChange={handleInputChange} className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded" />
+                    <input 
+                      type="checkbox" 
+                      id="isFavorite" 
+                      name="isFavorite" 
+                      checked={formData.isFavorite || false} 
+                      onChange={handleInputChange} 
+                      className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded" 
+                    />
                     <label htmlFor="isFavorite" className="ml-2 block text-sm text-gray-700">Menu Favorit</label>
                   </div>
                   <div className="flex items-center">
-                    <input type="checkbox" id="isAvailable" name="isAvailable" checked={formData.isAvailable || false} onChange={handleInputChange} className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded" />
+                    <input 
+                      type="checkbox" 
+                      id="isAvailable" 
+                      name="isAvailable" 
+                      checked={formData.isAvailable || false} 
+                      onChange={handleInputChange} 
+                      className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded" 
+                    />
                     <label htmlFor="isAvailable" className="ml-2 block text-sm text-gray-700">Tersedia</label>
                   </div>
                 </div>

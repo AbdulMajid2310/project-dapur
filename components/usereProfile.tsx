@@ -101,7 +101,7 @@ export default function UserProfile() {
   if (!isOpen) return null;
 
   return (
-    <motion.div className="fixed inset-0 z-50 flex items-start justify-center pt-16 bg-black/40">
+    <motion.div className="fixed inset-0 z-50 flex items-center justify-center  bg-black/40">
       <motion.div className="bg-white text-gray-700 w-full md:w-3xl max-h-[calc(100vh-4rem)] overflow-y-auto flex flex-col rounded-2xl shadow-xl">
         <div className="p-6 relative">
           <button
@@ -133,11 +133,11 @@ export default function UserProfile() {
                       </div>
                     </div>
 
-                    <div>
+                    <div className="space-y-2">
 
-                      <h3 className="text-2xl font-bold capitalize text-gray-800 mb-2">{userData.firstName} {userData.lastName}</h3>
-                      <p className="text-gray-500 mb-1">{userData.email}</p>
-                      <p className="text-gray-500 mb-4">{userData.phone}</p>
+                      <h3 className="text-xl border border-slate-300 rounded-xl p-2 font-bold capitalize text-gray-800 ">{userData.firstName} {userData.lastName}</h3>
+                      <p className="text-gray-500  border border-slate-300 rounded-xl p-2">{userData.email}</p>
+                      <p className="text-gray-500  border border-slate-300 rounded-xl p-2">{userData.phone}</p>
                     </div>
                   </div>
 

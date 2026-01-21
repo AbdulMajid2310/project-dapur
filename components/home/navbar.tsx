@@ -32,7 +32,6 @@ const navigationData = [
   { href: "#how-to-order", icon: <FaQrcode className="mr-2" />, text: "Cara Pesan" },
   { href: "#testimonials", icon: <FaStar className="mr-2" />, text: "Testimoni" },
   { href: "#faq", icon: <FaQuestionCircle className="mr-2" />, text: "FAQ" },
-  { href: "#kontak", icon: <FaEnvelope className="mr-2" />, text: "Kontak" },
 ];
 
 const wartegInfo = { name: "Dapur Umi" };
