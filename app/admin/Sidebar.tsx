@@ -37,51 +37,52 @@ const navigation: NavigationItem[] = [
     icon: <FaChartLine />, 
     label: "Dashboard", 
     href: "/admin",
-    color: "from-indigo-500 to-indigo-600"
+    color: "from-sky-500 to-sky-600"       // Biru cerah
   },
   { 
     id: "menu", 
     icon: <FaUtensils />, 
     label: "Kelola Menu", 
     href: "/admin/menu",
-    color: "from-orange-500 to-orange-600"
+    color: "from-amber-500 to-amber-600"   // Kuning makanan
   },
   { 
     id: "orders", 
     icon: <FaFileInvoice />, 
     label: "Pesanan", 
     href: "/admin/orders",
-    color: "from-blue-500 to-blue-600"
+    color: "from-emerald-500 to-emerald-600" // Hijau transaksi
   },
   { 
     id: "gallery", 
     icon: <FaImages />, 
     label: "Galeri", 
     href: "/admin/gallery",
-    color: "from-purple-500 to-purple-600"
+    color: "from-violet-500 to-violet-600" // Ungu modern
   },
   { 
     id: "testimonials", 
     icon: <FaQuoteLeft />, 
-    label: "Testimoni", 
+    label: "Testimonial", 
     href: "/admin/testimonials",
-    color: "from-pink-500 to-pink-600"
+    color: "from-rose-500 to-rose-600"     // Merah lembut
   },
   { 
     id: "faq", 
     icon: <FaQuestionCircle />, 
     label: "FAQ", 
     href: "/admin/faqs",
-    color: "from-teal-500 to-teal-600"
+    color: "from-cyan-500 to-cyan-600"     // Biru muda informatif
   },
   { 
     id: "profile", 
     icon: <FaCog />, 
     label: "Pengaturan Profil", 
     href: "/admin/profile",
-    color: "from-gray-500 to-gray-600"
+    color: "from-slate-500 to-slate-600"   // Netral profesional
   },
 ];
+
 
 export default function Sidebar({ notifications, isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();

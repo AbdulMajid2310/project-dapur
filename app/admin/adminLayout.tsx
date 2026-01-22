@@ -72,16 +72,23 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     description: "Pantau dan proses pesanan pelanggan",
                     icon: <FaFileInvoice />
                 };
-            case "/admin/notifications":
+            case "/admin/testimonialss":
                 return {
-                    title: "Notifikasi",
-                    description: "Aktivitas terbaru sistem",
+                    title: "Kelola Testimonial",
+                    description: "Pantau Testimonial terbaru sistem",
                     icon: <FaBell />
                 };
             case "/admin/gallery":
                 return {
                     title: "Kelola Galeri",
                     description: "Aktivitas terbaru sistem",
+                    icon: <FaBell />
+                };
+
+            case "/admin/faqs":
+                return {
+                    title: "Kelola FAQ",
+                    description: "Kelola FAQ terbaru sistem",
                     icon: <FaBell />
                 };
             default:
@@ -219,15 +226,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                                     <div>
 
                                         {userDetail?.avatar ? (
-                                          <div className="w-10 h-10 relative">
-    <Image
-        src={userDetail.avatar}
-        alt="Admin"
-        fill
-        className="rounded-full object-cover"
-        unoptimized
-    />
-</div>
+                                            <div className="w-10 h-10 relative">
+                                                <Image
+                                                    src={userDetail.avatar}
+                                                    alt="Admin"
+                                                    fill
+                                                    className="rounded-full object-cover"
+                                                    unoptimized
+                                                />
+                                            </div>
 
                                         ) : (
                                             <div className="w-9 h-9 bg-linear-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white">

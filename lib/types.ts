@@ -146,7 +146,7 @@ export type PageTitle =
   | "Kelola Pesanan"
   | "Notifikasi"
   | "Kelola Galeri"
-  | "Kelola Testimoni"
+  | "Kelola Testimonial"
   | "Kelola FAQ"
   | "Pengaturan Profil";
 
