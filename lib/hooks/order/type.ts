@@ -26,6 +26,15 @@ export interface OrderItem {
   updatedAt: string;
 }
 
+export interface TestimonialData{
+  testimonialId: string
+  imageurl: string
+  comment: string
+  rating: string
+  isApproved: boolean
+  createdAt: string
+}
+
 export interface Order {
   orderId: string;
   orderNumber: string;
@@ -75,6 +84,7 @@ export interface Order {
       updatedAt: string;
     };
   };
+  testimonials: TestimonialData,
   status: string;
   paymentStatus: string;
   paymentProof: string | null;

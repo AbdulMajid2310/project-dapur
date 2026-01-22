@@ -1,9 +1,10 @@
 import { useCustomerOrders } from '@/lib/hooks/order/useOrder';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react'; // Impor useState
 import { FaCalendarCheck, FaWindowClose } from 'react-icons/fa';
 import { FaRegCreditCard, FaSackDollar } from 'react-icons/fa6';
 import { FiPackage } from 'react-icons/fi';
+import CreateTestimonialSection from '../testimonials/createTestimonials';
 
 const getStatusStyle = (status: string) => {
   switch (status) {
@@ -42,6 +43,13 @@ const OrderCustomerComponent: React.FC = () => {
   const { orders, loading } = useCustomerOrders();
   const [activeFilter, setActiveFilter] = useState<string>('ALL');
   const [isModalOpen, setIsModalOpen] = useState(true);
+  const [isTestimonialOpen, setIsTestimonialOpen] = useState(true)
+
+  const [selectedOrderId, setSelectedOrderId] = useState("")
+  const [selectedItemId, setSelectedItemId] = useState("")
+  const [selectedItemsId, setSelectedItemsId] = useState("")
+
+
 
   const filteredOrders = activeFilter === 'ALL'
     ? orders
@@ -55,7 +63,17 @@ const OrderCustomerComponent: React.FC = () => {
     );
   }
 
+
   if (!isModalOpen) return null;
+
+  const handleOpenTestimonial = (itemId: string) => {
+
+
+    setSelectedItemId(itemId);
+    setIsTestimonialOpen(false);
+  };
+
+
 
   return (
     <motion.div className="fixed inset-0 z-50 flex items-start justify-center pt-16 bg-black/40">
@@ -76,105 +94,159 @@ const OrderCustomerComponent: React.FC = () => {
                 key={filter.key}
                 onClick={() => setActiveFilter(filter.key)}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${activeFilter === filter.key
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
               >
                 {filter.label}
               </button>
             ))}
           </div>
+          {isTestimonialOpen ? (
+            <div>
 
-          {filteredOrders.length === 0 ? (
-            <p className="flex flex-col items-center justify-center text-center bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-gray-700 space-y-2">
-              <span className="text-4xl">📭</span> {/* ikon */}
-              <span className="text-lg font-semibold">
-                Tidak ada pesanan dengan status &quot;
-                {filterOptions.find(f => f.key === activeFilter)?.label}
-                &quot;.
-              </span>
-              <span className="text-sm text-gray-500">
-                Coba periksa status lain atau lakukan pemesanan baru.
-              </span>
-            </p>
+              {filteredOrders.length === 0 ? (
+                <p className="flex flex-col items-center justify-center text-center bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-gray-700 space-y-2">
+                  <span className="text-4xl">📭</span> {/* ikon */}
+                  <span className="text-lg font-semibold">
+                    Tidak ada pesanan dengan status &quot;
+                    {filterOptions.find(f => f.key === activeFilter)?.label}
+                    &quot;.
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    Coba periksa status lain atau lakukan pemesanan baru.
+                  </span>
+                </p>
 
-          ) : (
-            // --- AWAL KODE YANG DIPERBAIKI ---
-            <div className="space-y-6">
-              {filteredOrders.map((order) => {
-                const statusStyle = getStatusStyle(order.status);
+              ) : (
+                // --- AWAL KODE YANG DIPERBAIKI ---
+                <div className="space-y-6">
+                  {filteredOrders.map((order) => {
+                    const statusStyle = getStatusStyle(order.status);
 
-                return (
-                  <div
-                    key={order.orderId}
-                    className="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                  >
-                    {/* Header: Nomor Pesanan dan Status */}
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 pb-4 border-b border-gray-100">
-                      <h3 className="text-xl font-bold text-gray-800 mb-2 sm:mb-0">
-                        Order #{order.orderNumber}
-                      </h3>
-                      <span
-                        className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase ${statusStyle.className}`}
+                    return (
+                      <div
+                        key={order.orderId}
+                        onClick={() => setSelectedOrderId(order.orderId)}
+                        className="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                       >
-                        {statusStyle.label}
-                      </span>
-                    </div>
 
-                    {/* Grid Informasi Utama */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 text-sm text-gray-600">
-                      <div className="flex items-center space-x-2">
-                        <FaCalendarCheck className="w-4 h-4 text-gray-400" />
-                        <span>{new Date(order.createdAt).toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <FaSackDollar className="w-4 h-4 text-gray-400" />
-                        <span className="font-semibold text-gray-800">
-                          Rp {parseInt(order.grandTotal).toLocaleString('id-ID')}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <FaRegCreditCard className="w-4 h-4 text-gray-400" />
-                        <span>{order.paymentStatus.replace('_', ' ')}</span>
-                      </div>
-                    </div>
 
-                    {/* Daftar Item */}
-                    <div>
-                      <h4 className="font-semibold text-gray-700 mb-3 flex items-center">
-                        <FiPackage className="w-4 h-4 mr-2" />
-                        Detail Pesanan
-                      </h4>
-                      <ul className="space-y-3">
-                        {order.items.map((item) => (
-                          <li
-                            key={item.id}
-                            className="flex items-center justify-between"
-                          >
-                            <div className="flex items-center flex-1">
-                              <img
-                                src={item.menuItem.image}
-                                alt={item.menuItem.name}
-                                className="w-14 h-14 object-cover rounded-full mr-4"
-                              />
-                              <div>
-                                <p className="font-medium text-gray-800">{item.menuItem.name}</p>
-                                <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
-                              </div>
-                            </div>
-                            <p className="font-semibold text-gray-900 ml-4">
-                              Rp {parseInt(item.priceAtPurchase).toLocaleString('id-ID')}
-                            </p>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                );
-              })}
+
+
+                        {/* Daftar Item */}
+                        <div>
+                          <h4 className="font-semibold text-gray-700 mb-3 flex items-center">
+                            <FiPackage className="w-4 h-4 mr-2" />
+                            Detail Pesanan
+                          </h4>
+                          <ul className="space-y-3">
+                            {order.items.map((item) => (
+                              <li
+                                key={item.id}
+                                onClick={() => {
+                                  // handleOpenTestimonial(item.id)
+                                  setSelectedItemsId(item.menuItem.menuItemId)
+                                }
+                                }
+                                className="flex items-center justify-between"
+                              >
+                                <div className="flex items-center flex-1">
+                                  <img
+                                    src={item.menuItem.image}
+                                    alt={item.menuItem.name}
+                                    className="w-14 h-14 object-cover rounded-full mr-4"
+                                  />
+                                  <div>
+                                    <p className="font-medium text-gray-800">{item.menuItem.name}</p>
+                                    <div className='flex gap-4'>
+
+                                      <p className="text-sm text-gray-500">Rp {parseInt(item.priceAtPurchase).toLocaleString('id-ID')}</p>
+                                      <p className="text-sm text-gray-500 capitalize">total pesanan: {item.quantity} </p>
+                                    </div>
+
+                                  </div>
+                                </div>
+                                <div>
+
+                                  <p className="font-semibold text-gray-900 ml-4">
+                                    Rp {parseInt(item.subtotal).toLocaleString('id-ID')}
+                                  </p>
+                                  {order.testimonials.comment}
+                                  {!order.testimonials?.testimonialId && (
+                                    <div>
+                                      <button className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90">
+                                        Beri penilaian 
+                                      </button>
+                                    </div>
+                                  )}
+
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        {/* Grid Informasi Utama */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 text-sm text-gray-600">
+                          <div className="flex items-center space-x-2">
+                            <FaCalendarCheck className="w-4 h-4 text-gray-400" />
+                            <span>{new Date(order.createdAt).toLocaleDateString()}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <FaSackDollar className="w-4 h-4 text-gray-400" />
+                            <span className="font-semibold text-gray-800">
+                              Rp {parseInt(order.grandTotal).toLocaleString('id-ID')}
+                            </span>
+                          </div>
+                          <div className="flex capitalize items-center space-x-2">
+                            <FaRegCreditCard
+                              className={`w-4 h-4 ${order.paymentStatus === 'PAID' ? 'text-green-600' : 'text-gray-400'
+                                }`}
+                            />
+
+                            <span
+                              className={`text-sm font-medium ${order.paymentStatus === 'PAID' ? 'text-green-600' : 'text-gray-600'
+                                }`}
+                            >
+                              {order.paymentStatus === 'PAID'
+                                ? 'pembayaran berhasil'
+                                : 'Belum melakukan pembayaran'}
+                            </span>
+                          </div>
+
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                // --- AKHIR KODE YANG DIPERBAIKI ---
+              )}
             </div>
-            // --- AKHIR KODE YANG DIPERBAIKI ---
+          ) : (
+
+
+            <AnimatePresence>
+
+
+              <motion.div className=" w-full max-w-2xl max-h-[90vh] scrollbar-hide pb-20 overflow-y-auto m-4" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={(e) => e.stopPropagation()}>
+                <div className="">
+                  <div className="px-5 flex rounded-lg justify-between items-center py-4 bg-linear-to-r from-blue-600 to-blue-500 text-white">
+                    <h2 className="text-lg font-semibold">Tulis Ulasan</h2>
+                    <p className="text-sm ">
+                      Bagikan pengalaman Anda dengan produk ini
+                    </p>
+                    <button onClick={() => setIsTestimonialOpen(true)} >
+                      <FaWindowClose className="text-xl text-white" />
+                    </button>
+                  </div>
+                  <CreateTestimonialSection menuId={selectedItemId} orderId={selectedOrderId} onClose={() => setIsTestimonialOpen(true)} itemId={selectedItemsId} />
+                </div>
+              </motion.div>
+
+
+            </AnimatePresence>
           )}
+
         </div>
       </motion.div>
     </motion.div>

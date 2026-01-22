@@ -135,6 +135,7 @@ export interface NavigationItem {
   icon: React.ReactNode;
   label: string;
   href: string;
+  color: string
 }
 
 export type PageTitle = 

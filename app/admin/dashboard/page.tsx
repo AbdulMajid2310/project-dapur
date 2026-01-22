@@ -35,7 +35,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ title, value, icon, color
 
 export default function Dashboard() {
   return (
-    <AdminLayout notifications={initialNotifications}>
+   
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -150,6 +150,6 @@ export default function Dashboard() {
           </div>
         </div>
       </motion.div>
-    </AdminLayout>
+  
   );
 }

@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "react-toastify";
 import axiosInstance from "@/lib/axiosInstance";
-import { MenuItem, Category } from "@/app/admin/menu/page"; // Asumsikan tipe diekspor dari sana
+import { MenuItem } from "@/app/admin/menu/page"; // Asumsikan tipe diekspor dari sana
 
 interface MenuFormData {
   name: string;
@@ -16,7 +16,6 @@ interface MenuFormData {
 export const useMenuManagement = () => {
   // --- States ---
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,16 +26,7 @@ export const useMenuManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
 
-  // --- API Calls ---
-  const fetchCategories = async () => {
-    try {
-      const response = await axiosInstance.get<{ message: string; data: Category[] }>('/categories');
-      setCategories(response.data.data || []);
-    } catch (error) {
-      toast.error('Gagal memuat data kategori.');
-      console.error(error);
-    }
-  };
+  
 
   const fetchMenuItems = async () => {
     try {
@@ -53,7 +43,6 @@ export const useMenuManagement = () => {
 
   // --- Effects ---
   useEffect(() => {
-    fetchCategories();
     fetchMenuItems();
   }, []);
 
@@ -68,8 +57,7 @@ export const useMenuManagement = () => {
     return menuItems.filter(
       (item) =>
         item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.category?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+        item.description?.toLowerCase().includes(searchTerm.toLowerCase()) 
     );
   }, [menuItems, searchTerm]);
 
@@ -157,7 +145,6 @@ export const useMenuManagement = () => {
   return {
     // Data
     menuItems,
-    categories,
     currentItems,
     totalPages,
     isLoading,
