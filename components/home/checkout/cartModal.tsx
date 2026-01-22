@@ -24,6 +24,7 @@ export default function CartModal({ onSelectItems }: CartModalProps) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [totalPrice, setTotalPrice] = useState(0);
 
+  console.log("data cart", cart)
   // STATE UNTUK ITEM YANG DIPILIH
   const [selectedCartIds, setSelectedCartIds] = useState<string[]>([]);
 
