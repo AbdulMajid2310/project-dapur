@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { FaUpload, FaTimes, FaEdit } from "react-icons/fa";
 import axiosInstance from "@/lib/axiosInstance";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { toast } from "react-toastify";
 
 interface User {
   userId: string;
@@ -33,6 +34,7 @@ export default function UserProfile() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [updating, setUpdating] = useState(false);
 
@@ -48,6 +50,7 @@ export default function UserProfile() {
         setFirstName(data.firstName);
         setLastName(data.lastName);
         setPhone(data.phone);
+        setEmail(data.email); 
         setLoading(false);
       } catch (err: any) {
         console.error("Error fetching user:", err);
@@ -70,6 +73,8 @@ export default function UserProfile() {
       formData.append("firstName", firstName);
       formData.append("lastName", lastName);
       formData.append("phone", phone);
+      formData.append("email", email);
+      
       if (avatarFile) formData.append("avatar", avatarFile);
 
       await axiosInstance.put(`/users/${userData.userId}`, formData, {
@@ -81,14 +86,15 @@ export default function UserProfile() {
         firstName,
         lastName,
         phone,
+        email,
         avatar: avatarFile ? URL.createObjectURL(avatarFile) : userData.avatar,
       });
 
-      alert("Profil berhasil diperbarui!");
+      toast("Profil berhasil diperbarui!");
       setIsEditing(false);
     } catch (err) {
       console.error(err);
-      alert("Gagal memperbarui profil.");
+      toast("Gagal memperbarui profil.");
     } finally {
       setUpdating(false);
     }
@@ -200,12 +206,13 @@ export default function UserProfile() {
 
                     <div className="mb-4">
                       <label className="block text-gray-700 mb-1">Email</label>
-                      <input
-                        type="email"
-                        value={userData.email}
-                        disabled
-                        className="w-full px-4 py-2 border border-gray-300 rounded-xl bg-gray-200 cursor-not-allowed"
-                      />
+                     <input
+  type="email"
+  value={email}
+  onChange={e => setEmail(e.target.value)}
+  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:outline-none"
+/>
+
                     </div>
 
                     <div className="flex gap-4">

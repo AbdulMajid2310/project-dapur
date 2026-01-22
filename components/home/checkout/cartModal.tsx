@@ -29,7 +29,8 @@ export default function CartModal({ onSelectItems }: CartModalProps) {
   const [selectedCartIds, setSelectedCartIds] = useState<string[]>([]);
 
   const { user } = useAuth();
-  const userId = "f884b326-0012-4fa2-ad7a-f5f3641abc55";
+  const userId = user?.userId || "";
+  console.log(userId)
 
   // Fetch cart data
   const getUserCart = async () => {
@@ -45,9 +46,10 @@ export default function CartModal({ onSelectItems }: CartModalProps) {
     }
   };
 
-  useEffect(() => {
-    getUserCart();
-  }, []);
+ useEffect(() => {
+  if (!userId) return; // ⛔ tunggu sampai ada userId
+  getUserCart();
+}, [userId]);
 
   // Update quantity
   const updateQuantity = async (cartItemId: string, quantity: number) => {

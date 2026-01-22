@@ -1,12 +1,12 @@
 // src/hooks/useCustomerOrders.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axiosInstance from '@/lib/axiosInstance';
 import { useAuth } from '../useAuth';
 import { Order, OrderResponse } from './type';
 import { toast } from 'react-toastify';
 
 interface UseCustomerOrdersOptions {
-  status?: string; // Opsional: filter berdasarkan status
+  status?: string;
 }
 
 export const useCustomerOrders = (options?: UseCustomerOrdersOptions) => {
@@ -15,7 +15,11 @@ export const useCustomerOrders = (options?: UseCustomerOrdersOptions) => {
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [deleting, setDeleting] = useState<boolean>(false);
 
+  /**
+   * Fetch orders
+   */
   useEffect(() => {
     if (!userId) {
       setLoading(false);
@@ -27,8 +31,13 @@ export const useCustomerOrders = (options?: UseCustomerOrdersOptions) => {
     const fetchOrders = async () => {
       setLoading(true);
       try {
-        const queryParams = options?.status ? `?status=${options.status}` : '';
-        const res = await axiosInstance.get<OrderResponse>(`/orders/user/${userId}${queryParams}`);
+        const queryParams = options?.status
+          ? `?status=${options.status}`
+          : '';
+
+        const res = await axiosInstance.get<OrderResponse>(
+          `/orders/user/${userId}${queryParams}`,
+        );
 
         if (!cancelled) {
           setOrders(res.data.data || []);
@@ -36,7 +45,9 @@ export const useCustomerOrders = (options?: UseCustomerOrdersOptions) => {
       } catch (err: any) {
         if (!cancelled) {
           setOrders([]);
-          toast.error(err.response?.data?.message || 'Failed to fetch orders');
+          toast.error(
+            err.response?.data?.message || 'Failed to fetch orders',
+          );
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -48,7 +59,46 @@ export const useCustomerOrders = (options?: UseCustomerOrdersOptions) => {
     return () => {
       cancelled = true;
     };
-  }, [userId, options?.status]); // Re-fetch jika userId atau status berubah
+  }, [userId, options?.status]);
 
-  return { orders, loading };
+  /**
+   * Delete order by user
+   */
+  const deleteOrder = useCallback(
+    async (orderId: string) => {
+      if (!userId) {
+        toast.error('User tidak terautentikasi');
+        return;
+      }
+
+      setDeleting(true);
+
+      try {
+        await axiosInstance.delete(
+          `/orders/${orderId}/user/${userId}`,
+        );
+
+        // Update state tanpa refetch
+        setOrders((prev) =>
+          prev.filter((order) => order.orderId !== orderId),
+        );
+
+        toast.success('Order berhasil dihapus');
+      } catch (err: any) {
+        toast.error(
+          err.response?.data?.message || 'Gagal menghapus order',
+        );
+      } finally {
+        setDeleting(false);
+      }
+    },
+    [userId],
+  );
+
+  return {
+    orders,
+    loading,
+    deleting,
+    deleteOrder, // 🔥 expose delete function
+  };
 };
