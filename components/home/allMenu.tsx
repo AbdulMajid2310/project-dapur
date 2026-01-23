@@ -14,44 +14,12 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { toast } from "react-toastify";
 import DetailMenu from "../detailProduct";
 
-/* =====================
-   TYPES
-===================== */
-export interface MenuItem {
-  menuItemId: string;
-  name: string;
-  description: string;
-  price: string;
-  image: string;
-  category: string | null;
-  isFavorite: boolean;
-  isAvailable: boolean;
-  stock: number;
-  orderCount: number;
-  rating: number | null;
-  reviewCount: number;
-  allergens: string | null;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
 
-interface MenuApiResponse {
-  message: string;
-  data: MenuItem[];
-}
 
 /* =====================
    CONSTANTS
 ===================== */
-const menuCategoriesData = [
-  { id: "all", name: "Semua Menu" },
-  { id: "favorite", name: "Menu Favorit" },
-  { id: "main", name: "Makanan Utama" },
-  { id: "side", name: "Lauk Pauk" },
-  { id: "drink", name: "Minuman" },
-  { id: "dessert", name: "Dessert" },
-];
+
 
 const sectionData = {
   title: "Semua Menu",
@@ -71,6 +39,7 @@ const containerVariants = {
 };
 
 import { Variants } from "framer-motion";
+import { MenuApiResponse, MenuItem } from "@/lib/hooks/menu/type";
 
 const itemVariants: Variants = {
   hidden: {
@@ -107,6 +76,7 @@ export default function AllMenu() {
   const userId = user?.userId;
 
   const [allMenuData, setAllMenuData] = useState<MenuItem[]>([]);
+  console.log('menuall', allMenuData)
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -138,13 +108,23 @@ export default function AllMenu() {
     fetchMenu();
   }, []);
 
+  const menuCategoriesData = [
+    { id: "all", name: "Semua" },
+    { id: "favorite", name: "Favorit" },
+    ...Array.from(new Set(allMenuData.map((item) => item.category))).map((cat) => ({
+      id: cat,
+      name: cat,
+    })),
+  ];
+
+
   /* =====================
      FILTER & PAGINATION
   ===================== */
   const filteredMenu = allMenuData.filter((item) => {
     const matchesSearch =
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchTerm.toLowerCase());
+      item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesCategory =
       selectedCategory === "all" ||
@@ -154,6 +134,7 @@ export default function AllMenu() {
 
     return matchesSearch && matchesCategory && item.isAvailable;
   });
+
 
   const totalPages = Math.ceil(filteredMenu.length / itemsPerPage);
   const currentMenuItems = filteredMenu.slice(
@@ -192,6 +173,7 @@ export default function AllMenu() {
   /* =====================
      RENDER
   ===================== */
+  
   return (
     <>
       <motion.section
@@ -217,20 +199,20 @@ export default function AllMenu() {
           {/* CATEGORY & SEARCH */}
           <div className="flex flex-col lg:flex-row gap-6 justify-between mb-12">
             <div className="flex overflow-x-auto scrollbar-hide gap-3">
-              {menuCategoriesData.map((cat) => (
+              {menuCategoriesData.map((cat, index) => (
                 <button
-                  key={cat.id}
+                  key={index}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-6 py-2 whitespace-nowrap  rounded-full font-semibold transition ${
-                    selectedCategory === cat.id
+                  className={`px-6 py-2 whitespace-nowrap rounded-full font-semibold transition ${selectedCategory === cat.id
                       ? "bg-white text-[#9C633D]"
                       : "bg-white/10 text-white hover:bg-white/20"
-                  }`}
+                    }`}
                 >
                   {cat.name}
                 </button>
               ))}
             </div>
+
 
             <div className="relative max-w-md w-full">
               <input
@@ -252,10 +234,10 @@ export default function AllMenu() {
             className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-16"
           >
             <AnimatePresence mode="popLayout">
-              {currentMenuItems.map((item) => (
+              {currentMenuItems.map((item, index) => (
                 <motion.div
                   layout
-                  key={item.menuItemId}
+                  key={index}
                   variants={itemVariants}
                   initial="hidden"
                   animate="visible"
@@ -316,11 +298,10 @@ export default function AllMenu() {
                 <button
                   key={i}
                   onClick={() => setCurrentPage(i + 1)}
-                  className={`px-3 py-1 rounded ${
-                    currentPage === i + 1
+                  className={`px-3 py-1 rounded ${currentPage === i + 1
                       ? "bg-white text-[#9C633D]"
                       : "text-white"
-                  }`}
+                    }`}
                 >
                   {i + 1}
                 </button>

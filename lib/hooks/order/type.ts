@@ -1,7 +1,8 @@
+import { TestimonialData } from "../testimonial/type";
 
 // Tipe data untuk respons dari API
 export interface OrderItem {
-  id: string;
+  orderItemId: string;
   menuItem: {
     menuItemId: string;
     name: string;
@@ -26,14 +27,7 @@ export interface OrderItem {
   updatedAt: string;
 }
 
-export interface TestimonialData{
-  testimonialId: string
-  imageurl: string
-  comment: string
-  rating: string
-  isApproved: boolean
-  createdAt: string
-}
+
 
 export interface Order {
   orderId: string;

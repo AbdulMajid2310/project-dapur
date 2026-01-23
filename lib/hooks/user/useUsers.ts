@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { User } from "./type";
 import axiosInstance from "@/lib/axiosInstance";
+import { UserData } from "./type";
 
 export const useUsers = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [userDetail, setUserDetail] = useState<User | null>(null);
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [userDetail, setUserDetail] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

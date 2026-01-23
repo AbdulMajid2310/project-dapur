@@ -5,33 +5,9 @@ import { useEffect, useState } from "react";
 import { FaStar, FaPlus, FaChevronRight } from "react-icons/fa";
 import { toast } from "react-toastify";
 import DetailMenu from "../detailProduct";
+import { MenuApiResponse, MenuItem } from "@/lib/hooks/menu/type";
 
-// =====================
-// TYPES
-// =====================
-export interface MenuItem {
-  menuItemId: string;
-  name: string;
-  description: string;
-  price: string;
-  image: string;
-  isAvailable: boolean;
-  isFavorite: boolean;
-  stock: number;
-  orderCount: number;
-  rating: number | null;
-  reviewCount: number;
-  allergens: string | null;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  category: string | null;
-}
 
-export interface MenuApiResponse {
-  message: string;
-  data: MenuItem[];
-}
 
 // =====================
 // ANIMATIONS
@@ -70,7 +46,7 @@ export default function FavoriteMenu() {
           description: item.description,
           price: item.price,
           image: item.image,
-          category: item.category || null,
+          category: item.category ,
           isFavorite: item.isFavorite,
           isAvailable: item.isAvailable,
           stock: item.stock,
@@ -81,6 +57,7 @@ export default function FavoriteMenu() {
           isActive: item.isActive,
           createdAt: item.createdAt,
           updatedAt: item.updatedAt,
+          testimonials: item.testimonials || []
         }));
 
         setFavoriteMenuData(formattedData);

@@ -65,7 +65,7 @@ export default function GallerySection() {
 
   return (
     <motion.section
-      id="galeri"
+      id="gallery"
       className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
       initial="hidden"
       whileInView="visible"

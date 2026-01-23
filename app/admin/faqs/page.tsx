@@ -54,7 +54,6 @@ export default function FAQManagement() {
         setIsLoading(true);
         const response = await axiosInstance.get('/faqs');
         setFaqs(response.data.data);
-        toast.success(response.data.message || "Data FAQ berhasil dimuat.");
       } catch (error: any) {
         toast.error(error.response?.data?.message || "Gagal memuat data FAQ.");
         console.error("Gagal memuat data FAQ:", error);
@@ -125,7 +124,6 @@ export default function FAQManagement() {
       if (selectedFAQ.faqId) {
         const { faqId, createdAt, updatedAt, ...updateData } = selectedFAQ;
         await axiosInstance.put(`/faqs/${selectedFAQ.faqId}`, updateData);
-        toast.success("FAQ berhasil diperbarui.");
       } else {
         await axiosInstance.post('/faqs', selectedFAQ);
         toast.success("FAQ berhasil ditambahkan.");

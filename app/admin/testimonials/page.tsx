@@ -1,485 +1,494 @@
-// TestimonialsManagement.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import axiosInstance from '@/lib/axiosInstance';
+import { ApiResponse, TestimonialData } from '@/lib/hooks/testimonial/type';
+import React, { useState, useEffect } from 'react';
 import {
-  FaQuoteLeft,
-  FaEdit,
-  FaTrash,
-  FaPlus,
-  FaSearch,
-  FaTimes,
-  FaSave,
   FaStar,
-  FaChevronLeft,
-  FaChevronRight,
-} from "react-icons/fa";
+  FaTrashAlt,
+  FaRedo,
+  FaCommentDots,
+  FaExclamationTriangle,
+  FaTimes,
+  FaInfoCircle,
+  FaShoppingCart,
+  FaSearch,
+  FaTh,
+  FaList
+} from 'react-icons/fa';
+import { IoFastFoodOutline } from 'react-icons/io5';
+import { toast } from 'react-toastify';
 
-// Type definitions
-interface Testimonial {
-  id: number;
-  name: string;
-  avatar: string;
-  comment: string;
-  rating: number;
-  date: string;
-  status: "published" | "draft";
-}
 
-// Initial data
-const initialTestimonials: Testimonial[] = [
-  {
-    id: 1,
-    name: "Budi Santoso",
-    avatar: "https://picsum.photos/100/100?random=1",
-    comment: "Sekarang makan di warteg jadi lebih praktis! Tidak perlu antri lagi.",
-    rating: 5,
-    date: "2023-08-10",
-    status: "published",
-  },
-  {
-    id: 2,
-    name: "Siti Nurhaliza",
-    avatar: "https://picsum.photos/100/100?random=2",
-    comment: "Menu digitalnya sangat membantu, bisa lihat gambar makanan sebelum pesan.",
-    rating: 4,
-    date: "2023-08-08",
-    status: "published",
-  },
-  {
-    id: 3,
-    name: "Ahmad Fauzi",
-    avatar: "https://picsum.photos/100/100?random=3",
-    comment: "Pembayaran dengan QRIS sangat memudahkan, tidak perlu bawa uang tunai.",
-    rating: 5,
-    date: "2023-08-05",
-    status: "published",
-  },
-];
 
-export default function TestimonialsManagement() {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>(initialTestimonials);
-  const [filteredTestimonials, setFilteredTestimonials] = useState<Testimonial[]>(initialTestimonials);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [isTestimonialModalOpen, setIsTestimonialModalOpen] = useState(false);
-  const [selectedTestimonial, setSelectedTestimonial] = useState<Testimonial | null>(null);
+const TestimonialSection: React.FC = () => {
+  const [testimonials, setTestimonials] = useState<TestimonialData[] | null>(null);
+  const [filteredTestimonials, setFilteredTestimonials] = useState<TestimonialData[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // Filter testimonials
+
+
+
+  const fetchTestimonials = async () => {
+    try {
+      setLoading(true);
+      setError(null); // Reset error state sebelum fetch
+      const response = await axiosInstance.get<ApiResponse>('/testimonials');
+      setTestimonials(response.data.data);
+      setFilteredTestimonials(response.data.data);
+    } catch (err: any) {
+      setError('Gagal memuat testimoni.');
+      console.error("Error fetching testimonials:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (searchTerm === "") {
-      setFilteredTestimonials(testimonials);
-    } else {
-      const filtered = testimonials.filter(
-        (item) =>
-          item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.comment.toLowerCase().includes(searchTerm.toLowerCase())
+    fetchTestimonials();
+  }, []);
+
+  useEffect(() => {
+    if (testimonials) {
+      const filtered = testimonials.filter(testimonial =>
+        testimonial.user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        testimonial.user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        testimonial.menuItem.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        testimonial.comment.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredTestimonials(filtered);
     }
   }, [searchTerm, testimonials]);
 
-  // Testimonial CRUD functions
-  const openAddTestimonialModal = () => {
-    setSelectedTestimonial({
-      id: testimonials.length + 1,
-      name: "",
-      avatar: "",
-      comment: "",
-      rating: 5,
-      date: new Date().toISOString().split("T")[0],
-      status: "published",
-    });
-    setIsTestimonialModalOpen(true);
-  };
-
-  const openEditTestimonialModal = (testimonial: Testimonial) => {
-    setSelectedTestimonial(testimonial);
-    setIsTestimonialModalOpen(true);
-  };
-
-  const handleTestimonialChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value, type } = e.target;
-    const val = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
-
-    setSelectedTestimonial((prev) => {
-      if (!prev) return null;
-      return { ...prev, [name]: val };
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
   };
 
-  const saveTestimonial = () => {
-    if (!selectedTestimonial) return;
+  const handleDelete = async (testimonialId: string, userName: string) => {
 
-    if (selectedTestimonial.id > testimonials.length) {
-      // Add new testimonial
-      setTestimonials([...testimonials, selectedTestimonial]);
-    } else {
-      // Update existing testimonial
-      setTestimonials(
-        testimonials.map((testimonial) =>
-          testimonial.id === selectedTestimonial.id ? selectedTestimonial : testimonial
-        )
-      );
-    }
-    setIsTestimonialModalOpen(false);
-    alert("Testimoni berhasil disimpan!");
-  };
+    const previousTestimonials = testimonials;
+    setTestimonials((prev) => prev?.filter((t) => t.testimonialId !== testimonialId) || null);
+    setFilteredTestimonials((prev) => prev?.filter((t) => t.testimonialId !== testimonialId) || null);
 
-  const deleteTestimonial = (id: number) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus testimoni ini?")) {
-      setTestimonials(testimonials.filter((testimonial) => testimonial.id !== id));
-      alert("Testimoni berhasil dihapus!");
+    setDeletingId(testimonialId);
+
+    try {
+      await axiosInstance.delete(`/testimonials/admin/${testimonialId}`);
+    } catch (err: any) {
+      setTestimonials(previousTestimonials);
+      setFilteredTestimonials(previousTestimonials);
+      toast('Gagal menghapus testimoni. Silakan coba lagi.');
+    } finally {
+      setDeletingId(null);
     }
   };
 
-  // Handle search change
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+  // Fungsi untuk menangani error gambar
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.src = 'https://via.placeholder.com/150/E5E7EB/6B7280?text=No+Image';
   };
 
-  // Pagination
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentTestimonialItems = filteredTestimonials.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-  const totalTestimonialPages = Math.ceil(filteredTestimonials.length / itemsPerPage);
-
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-
-  // Render testimonial modal
-  const renderTestimonialModal = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex justify-between items-center">
-            <h3 className="text-xl font-bold text-gray-800">
-              {selectedTestimonial && selectedTestimonial.id > testimonials.length
-                ? "Tambah Testimoni"
-                : "Edit Testimoni"}
-            </h3>
-            <button
-              onClick={() => setIsTestimonialModalOpen(false)}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <FaTimes />
-            </button>
+  // --- Tampilan Loading ---
+  if (loading) {
+    return (
+      <section className="bg-linear-to-br from-indigo-50 via-white to-purple-50 py-12 px-4 min-h-screen flex justify-center items-center">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-indigo-100 rounded-full">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-600"></div>
           </div>
+          <p className="mt-4 text-gray-600 font-medium">Memuat data testimoni...</p>
         </div>
+      </section>
+    );
+  }
 
-        <div className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nama
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={selectedTestimonial?.name || ""}
-              onChange={handleTestimonialChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              required
-            />
+  // --- Tampilan Error ---
+  if (error) {
+    return (
+      <section className="bg-linear-to-br from-indigo-50 via-white to-purple-50 py-12 px-4 min-h-screen flex justify-center items-center">
+        <div className="text-center text-red-600 bg-white p-8 rounded-xl shadow-lg max-w-md">
+          <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-red-100 rounded-full">
+            <FaExclamationTriangle className="text-3xl" />
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              URL Avatar
-            </label>
-            <input
-              type="text"
-              name="avatar"
-              value={selectedTestimonial?.avatar || ""}
-              onChange={handleTestimonialChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              required
-            />
-            {selectedTestimonial?.avatar && (
-              <div className="mt-2 flex items-center space-x-2">
-                <div className="h-12 w-12 rounded-full overflow-hidden">
-                  <img
-                    src={selectedTestimonial.avatar}
-                    alt="Avatar Preview"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="text-sm text-gray-500">Preview</span>
-              </div>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Testimoni
-            </label>
-            <textarea
-              name="comment"
-              value={selectedTestimonial?.comment || ""}
-              onChange={handleTestimonialChange}
-              rows={4}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Rating
-              </label>
-              <select
-                name="rating"
-                value={selectedTestimonial?.rating || 5}
-                onChange={handleTestimonialChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                required
-              >
-                <option value={5}>5 Bintang</option>
-                <option value={4}>4 Bintang</option>
-                <option value={3}>3 Bintang</option>
-                <option value={2}>2 Bintang</option>
-                <option value={1}>1 Bintang</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tanggal
-              </label>
-              <input
-                type="date"
-                name="date"
-                value={selectedTestimonial?.date || ""}
-                onChange={handleTestimonialChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Status
-            </label>
-            <select
-              name="status"
-              value={selectedTestimonial?.status || "published"}
-              onChange={handleTestimonialChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              required
-            >
-              <option value="published">Diterbitkan</option>
-              <option value="draft">Draft</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="p-6 border-t border-gray-200 flex justify-end">
+          <p className="text-lg font-semibold mb-4">{error}</p>
           <button
-            onClick={() => setIsTestimonialModalOpen(false)}
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg mr-3"
+            onClick={fetchTestimonials}
+            className="inline-flex items-center px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition-colors"
           >
-            Batal
-          </button>
-          <button
-            onClick={saveTestimonial}
-            className="px-4 py-2 bg-orange-500 text-white rounded-lg"
-          >
-            Simpan
+            <FaRedo className="mr-2" /> Coba Lagi
           </button>
         </div>
-      </div>
-    </div>
-  );
+      </section>
+    );
+  }
 
+  // --- Tampilan Kosong ---
+  if (!testimonials || testimonials.length === 0) {
+    return (
+      <section className="bg-linear-to-br from-indigo-50 via-white to-purple-50 py-12 px-4 min-h-screen flex justify-center items-center">
+        <div className="text-center text-gray-500 bg-white p-8 rounded-xl shadow-lg max-w-md">
+          <div className="inline-flex items-center justify-center w-20 h-20 mb-4 bg-gray-100 rounded-full">
+            <FaCommentDots className="text-4xl" />
+          </div>
+          <p className="text-xl font-medium mb-2">Belum ada testimoni.</p>
+          <p className="text-sm">Jadilah yang pertama memberikan ulasan!</p>
+        </div>
+      </section>
+    );
+  }
+
+  // --- Tampilan Utama ---
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-800">Kelola Testimoni</h2>
+    <>
 
-        <div className="flex flex-wrap gap-3 mt-4 md:mt-0">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Cari testimoni..."
-              className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+
+      <section className=" min-h-screen">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-linear-to-r mb-4 from-orange-500 to-red-500 rounded-2xl p-6 text-white shadow-lg">
+            <div className="flex flex-col md:flex-row md:items-center justify-between">
+              <div>
+                <h2 className="text-3xl font-bold mb-2 flex items-center">
+                  <IoFastFoodOutline className="mr-3" /> Kelola Testimoni Pelanggan
+                </h2>
+                <p className="text-orange-100">Kelola koleksi gambar untuk website Anda</p>
+              </div>
+
+            </div>
           </div>
 
-          <button
-            onClick={openAddTestimonialModal}
-            className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg flex items-center"
-          >
-            <FaPlus className="mr-2" /> Tambah Testimoni
-          </button>
-        </div>
-      </div>
 
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Pelanggan
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Testimoni
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rating
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tanggal
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Aksi
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              <AnimatePresence>
-                {currentTestimonialItems.map((testimonial) => (
-                  <motion.tr
-                    key={testimonial.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
+          {/* Search and Filter Controls */}
+          <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="relative flex-1 max-w-md">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaSearch className="text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  placeholder="Cari berdasarkan nama, produk, atau komentar..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-md ${viewMode === 'grid' ? 'bg-indigo-100 text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  aria-label="Grid view"
+                >
+                  <FaTh />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-indigo-100 text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  aria-label="List view"
+                >
+                  <FaList />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Testimonials Display */}
+          {viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {filteredTestimonials?.map((testimonial) => (
+                <div
+                  key={testimonial.testimonialId}
+                  className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1"
+                >
+                  <div className="relative h-48 bg-gray-100">
+                    <img
+                      src={testimonial.imageUrl || testimonial.menuItem.image}
+                      alt={testimonial.menuItem.name}
+                      className="w-full h-full object-cover"
+                      onError={handleImageError}
+                    />
+                    <div className="absolute top-2 right-2 bg-white bg-opacity-90 rounded-full p-1">
                       <div className="flex items-center">
-                        <div className="h-10 w-10 shrink-0">
-                          <img
-                            className="h-10 w-10 rounded-full"
-                            src={testimonial.avatar}
-                            alt={testimonial.name}
-                          />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {testimonial.name}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">
-                        {testimonial.comment.substring(0, 50)}...
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex text-yellow-400">
                         {[...Array(5)].map((_, i) => (
                           <FaStar
                             key={i}
-                            className={`h-4 w-4 ${
-                              i < testimonial.rating ? "fill-current" : ""
-                            }`}
+                            size={12}
+                            className={`${i < testimonial.rating ? "text-yellow-400" : "text-gray-300"}`}
                           />
                         ))}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {testimonial.date}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          testimonial.status === "published"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {testimonial.status === "published" ? "Diterbitkan" : "Draft"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => openEditTestimonialModal(testimonial)}
-                        className="text-blue-600 hover:text-blue-900 mr-3"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button
-                        onClick={() => deleteTestimonial(testimonial.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        <FaTrash />
-                      </button>
-                    </td>
-                  </motion.tr>
-                ))}
-              </AnimatePresence>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Pagination */}
-      {totalTestimonialPages > 1 && (
-        <div className="flex items-center justify-center mt-6">
-          <nav
-            className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-            aria-label="Pagination"
-          >
-            <button
-              onClick={() =>
-                paginate(currentPage > 1 ? currentPage - 1 : 1)
-              }
-              disabled={currentPage === 1}
-              className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              <span className="sr-only">Previous</span>
-              <FaChevronLeft className="h-5 w-5" aria-hidden="true" />
-            </button>
-            {Array.from({ length: totalTestimonialPages }, (_, i) => i + 1).map(
-              (page) => (
-                <button
-                  key={page}
-                  onClick={() => paginate(page)}
-                  className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                    currentPage === page
-                      ? "z-10 bg-orange-50 border-orange-500 text-orange-600"
-                      : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
-                  }`}
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center mb-4">
+                      <img
+                        className="h-10 w-10 rounded-full object-cover ring-2 ring-indigo-500 ring-offset-2"
+                        src={testimonial.user?.avatar || "https://via.placeholder.com/150/E5E7EB/6B7280?text=User"}
+                        alt={`${testimonial.user.firstName} ${testimonial.user.lastName}`}
+                        onError={handleImageError}
+                      />
+                      <div className="ml-3">
+                        <p className="text-sm font-medium capitalize line-clamp-1 text-gray-900">
+                          {testimonial.user.firstName} {testimonial.user.lastName}
+                        </p>
+                        <p className="text-xs text-gray-500">{formatDate(testimonial.createdAt)}</p>
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 line-clamp-1 mb-2">{testimonial.menuItem.name}</h3>
+                    <p className="text-gray-600 text-sm line-clamp-2 mb-4">"{testimonial.comment}"</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Rp {parseFloat(testimonial.menuItem.price).toLocaleString('id-ID')}</span>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => setExpandedId(testimonial.testimonialId)}
+                          className="text-indigo-600 hover:text-indigo-800 transition-colors"
+                          aria-label="View details"
+                        >
+                          <FaInfoCircle size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(testimonial.testimonialId, `${testimonial.user.firstName} ${testimonial.user.lastName}`)}
+                          disabled={deletingId === testimonial.testimonialId}
+                          className="text-red-600 hover:text-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          aria-label={`Hapus testimoni dari ${testimonial.user.firstName} ${testimonial.user.lastName}`}
+                        >
+                          {deletingId === testimonial.testimonialId ? (
+                            <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          ) : (
+                            <FaTrashAlt size={16} />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredTestimonials?.map((testimonial) => (
+                <div
+                  key={testimonial.testimonialId}
+                  className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl"
                 >
-                  {page}
-                </button>
-              )
-            )}
-            <button
-              onClick={() =>
-                paginate(
-                  currentPage < totalTestimonialPages
-                    ? currentPage + 1
-                    : totalTestimonialPages
-                )
-              }
-              disabled={currentPage === totalTestimonialPages}
-              className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              <span className="sr-only">Next</span>
-              <FaChevronRight className="h-5 w-5" aria-hidden="true" />
-            </button>
-          </nav>
+                  <div className="flex flex-col md:flex-row">
+
+                    <div className="p-4 flex-1">
+                      <div className="flex flex-col md:flex-row md:items-start md:justify-between">
+                        <div className='flex gap-4 '>
+
+                          <div className="flex items-center">
+                            <img
+                              className="h-12 w-12 rounded-full object-cover ring-2 ring-indigo-500 ring-offset-2"
+                              src={testimonial.user?.avatar || "https://via.placeholder.com/150/E5E7EB/6B7280?text=User"}
+                              alt={`${testimonial.user.firstName} ${testimonial.user.lastName}`}
+                              onError={handleImageError}
+                            />
+                            <div className="ml-4">
+                              <p className="text-lg capitalize font-semibold text-gray-900">
+                                {testimonial.user.firstName} {testimonial.user.lastName}
+                              </p>
+                              <div className="flex items-center mt-1">
+                                {[...Array(5)].map((_, i) => (
+                                  <FaStar
+                                    key={i}
+                                    size={14}
+                                    className={`${i < testimonial.rating ? "text-yellow-400" : "text-gray-300"}`}
+                                  />
+                                ))}
+                                <span className="ml-2 text-sm text-gray-600">({testimonial.rating}/5)</span>
+                              </div>
+                              <p className="text-sm text-gray-500 mt-1">{formatDate(testimonial.createdAt)}</p>
+                            </div>
+                          </div>
+                          <div>
+
+                            {/* Bagian Tengah: Komentar/Testimoni */}
+                            <div className=' bg-gray-50 rounded-r-lg border-indigo-500 flex flex-col justify-center text-left h-full border-l-4'>
+                                <p className='text-gray-700 font-bold pl-4'>Ulasan :</p>
+                              <blockquote className="text-gray-700 w-full h-full italic line-clamp-2  px-6 py-2   text-base leading-relaxed">
+                                "{testimonial.comment}"
+                              </blockquote>
+                            </div>
+                          </div>
+                          <div>
+
+
+                          </div>
+                        </div>
+                        <div className="flex items-center mt-4 md:mt-0 space-x-2">
+                          <button
+                            onClick={() => setExpandedId(testimonial.testimonialId)}
+                            className="inline-flex items-center px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 transition-colors"
+                          >
+                            <FaInfoCircle className="mr-1" /> Detail
+                          </button>
+                          <button
+                            onClick={() => handleDelete(testimonial.testimonialId, `${testimonial.user.firstName} ${testimonial.user.lastName}`)}
+                            disabled={deletingId === testimonial.testimonialId}
+                            className="p-2 text-red-600 bg-red-100 rounded-full hover:bg-red-600 hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            aria-label={`Hapus testimoni dari ${testimonial.user.firstName} ${testimonial.user.lastName}`}
+                          >
+                            {deletingId === testimonial.testimonialId ? (
+                              <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                            ) : (
+                              <FaTrashAlt size={16} />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Detail Modal */}
+      {expandedId && testimonials && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-2xl w-full scrollbar-hide max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4 pb-2 border-b">
+              <h3 className="text-lg font-bold text-gray-900">Detail Testimoni</h3>
+              <button
+                onClick={() => setExpandedId(null)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <FaTimes size={18} />
+              </button>
+            </div>
+
+            {testimonials.filter(t => t.testimonialId === expandedId).map(testimonial => (
+              <div key={testimonial.testimonialId} className="space-y-4">
+                {/* User Info */}
+                <div className="flex items-center">
+                  <img
+                    className="h-12 w-12 rounded-full object-cover"
+                    src={testimonial.user?.avatar || "https://via.placeholder.com/150/E5E7EB/6B7280?text=User"}
+                    alt={`${testimonial.user.firstName} ${testimonial.user.lastName}`}
+                    onError={handleImageError}
+                  />
+                  <div className="ml-3">
+                    <p className="text-base font-medium capitalize text-gray-900">
+                      {testimonial.user.firstName} {testimonial.user.lastName}
+                    </p>
+                    <div className="flex items-center mt-1">
+                      {[...Array(5)].map((_, i) => (
+                        <FaStar
+                          key={i}
+                          size={14}
+                          className={`${i < testimonial.rating ? "text-yellow-400" : "text-gray-300"}`}
+                        />
+                      ))}
+                      <span className="ml-2 text-sm text-gray-600">({testimonial.rating}/5)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Product Info */}
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center">
+                    <FaShoppingCart className="mr-1" /> Informasi Produk
+                  </h4>
+                  <div className="flex items-center bg-gray-50 p-3 rounded-lg">
+                    <img
+                      className="h-14 w-14 rounded-md object-cover"
+                      src={testimonial.menuItem.image}
+                      alt={testimonial.menuItem.name}
+                      onError={handleImageError}
+                    />
+                    <div className="ml-3 flex-1">
+                      <p className="text-sm font-medium text-gray-900">
+                        {testimonial.menuItem.name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {testimonial.menuItem.category}
+                      </p>
+                      <p className="text-sm font-semibold text-indigo-600 mt-1">
+                        Rp {parseFloat(testimonial.menuItem.price).toLocaleString('id-ID')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Testimonial Image */}
+                {testimonial.imageUrl && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Gambar Testimoni</h4>
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <img
+                        className="w-full h-60 object-contain rounded-md"
+                        src={testimonial.imageUrl}
+                        alt="Testimonial image"
+                        onError={handleImageError}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Order Info */}
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Informasi Pesanan</h4>
+                  <div className="bg-gray-50 p-3 rounded-lg space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-xs text-gray-600">ID Pesanan:</span>
+                      <span className="text-xs font-medium text-gray-900">{testimonial.order.orderNumber}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-xs text-gray-600">Status:</span>
+                      <span className={`text-xs font-medium ${testimonial.order.status === 'COMPLETED' ? 'text-green-600' : 'text-gray-900'
+                        }`}>
+                        {testimonial.order.status === 'COMPLETED' ? (
+                          <span className="flex items-center">
+                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            Selesai
+                          </span>
+                        ) : testimonial.order.status}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-xs text-gray-600">Tanggal Pesanan:</span>
+                      <span className="text-xs font-medium text-gray-900">
+                        {formatDate(testimonial.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Testimonial Comment */}
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Komentar</h4>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-sm text-gray-700 italic">
+                      "{testimonial.comment}"
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
-
-      {/* Testimonial Modal */}
-      {isTestimonialModalOpen && renderTestimonialModal()}
-    </div>
+    </>
   );
-}
+};
+
+export default TestimonialSection;

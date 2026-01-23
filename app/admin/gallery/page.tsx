@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -33,7 +33,15 @@ interface GalleryItem {
   category: string;
   order: number;
   isActive: boolean;
-  createdAt?: string; // Tambahkan field untuk tanggal
+  metadata: any | null; // Tambahkan field metadata
+  createdAt: string; // Ubah menjadi required
+  updatedAt: string; // Tambahkan field updatedAt
+}
+
+// API Response interface
+interface GalleryResponse {
+  message: string;
+  data: GalleryItem[];
 }
 
 export default function GalleryManagement() {
@@ -58,9 +66,10 @@ export default function GalleryManagement() {
   const fetchGalleryItems = async () => {
     try {
       setIsLoading(true);
-      const response = await axiosInstance.get<GalleryItem[]>('/gallery');
-      setGalleryItems(response.data);
-      setFilteredGalleryItems(response.data);
+      const response = await axiosInstance.get<GalleryResponse>('/gallery');
+      // Perbaikan: Akses data dari response.data.data
+      setGalleryItems(response.data.data);
+      setFilteredGalleryItems(response.data.data);
     } catch (error) {
       toast.error('Gagal memuat data galeri.');
       console.error(error);
@@ -473,7 +482,7 @@ export default function GalleryManagement() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <AnimatePresence>
               {currentGalleryItems.map((item) => (
                 <motion.div
@@ -492,7 +501,7 @@ export default function GalleryManagement() {
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
                       <div className="p-4 text-white w-full">
-                        <p className="text-sm">{item.caption}</p>
+                        <p className="text-sm ">{item.caption}</p>
                       </div>
                     </div>
                     <div className="absolute top-3 right-3">
@@ -502,7 +511,7 @@ export default function GalleryManagement() {
                     </div>
                   </div>
                   <div className="p-4">
-                    <h3 className="font-semibold text-lg text-gray-800 mb-2">{item.title}</h3>
+                    <h3 className="font-semibold text-lg text-gray-800 mb-2 capitalize">{item.title}</h3>
                     <div className="flex items-center justify-between">
                       <div className="flex space-x-2">
                         <button 
@@ -512,13 +521,13 @@ export default function GalleryManagement() {
                         >
                           <FaEdit />
                         </button>
-                        <button 
+                        {/* <button 
                           onClick={() => openPreviewModal(item)} 
                           className="bg-green-100 text-green-600 p-2 rounded-lg hover:bg-green-200 transition-colors"
                           title="Preview"
                         >
                           <FaEye />
-                        </button>
+                        </button> */}
                         <button 
                           onClick={() => deleteGalleryItem(item.galleryId)} 
                           className="bg-red-100 text-red-600 p-2 rounded-lg hover:bg-red-200 transition-colors"

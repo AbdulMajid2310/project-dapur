@@ -6,15 +6,6 @@ import { FaQuestionCircle, FaChevronDown } from "react-icons/fa";
 import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "react-toastify";
 
-// Variants animasi
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: { duration: 0.5 },
-  },
-};
 
 // Section default
 const sectionData = {
@@ -26,6 +17,8 @@ export default function FAQSection() {
   const [faqData, setFaqData] = useState<any[]>([]);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+  console.log("data faq", faqData)
 
   const toggleFaq = (index: number) => {
     setActiveFaq(activeFaq === index ? null : index);
@@ -66,7 +59,7 @@ export default function FAQSection() {
       <div className="container mx-auto">
         <motion.div
           className="text-center max-w-2xl mx-auto mb-16"
-          variants={itemVariants}
+         
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4 flex items-center justify-center text-white">
             <FaQuestionCircle className="text-orange-300 mr-3" /> {sectionData.title}
@@ -92,7 +85,7 @@ export default function FAQSection() {
               <motion.div
                 key={faq.faqId}
                 className="mb-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden shadow-lg"
-                variants={itemVariants}
+                
               >
                 <motion.button
                   className="w-full flex justify-between items-center p-6 text-left focus:outline-none"

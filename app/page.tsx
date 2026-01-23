@@ -3,82 +3,31 @@
 import Navbar from "@/components/home/navbar";
 import FeaturesSection from "@/components/home/featuresSection";
 import HeroSection from "@/components/home/heroSection";
-import FavoriteMenu from "@/components/home/favoriteMenu";
-import AllMenu from "@/components/home/allMenu";
-import TestimonialsSection from "@/components/home/testimonialsSection";
-import ContactSection from "@/components/home/contactSection";
-import FAQSection from "@/components/home/FAQSection";
-import GallerySection from "@/components/home/gallerySection";
-import Footer from "@/components/home/footer";
 import PaymentStep from "@/components/home/paymentStep";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/hooks/useAuth";
-import { useEffect } from "react";
+import Footer from "@/components/home/footer";
+import LazySection from "@/components/home/lazySection"; 
 
-export default function WartegLanding() {
-  const router = useRouter(); // ✅
-  const { userLoading, user } = useAuth();
+export default function Home() {
+  
 
-  // ✅ PROTEKSI ROUTE ADMIN
-  useEffect(() => {
-    if (!userLoading) {
-      // kalau tidak ada user → ke login
-      if (!user) {
-        router.push("/login");
-        return;
-      }
-
-      // kalau ada user tapi bukan admin → ke login (atau /unauthorized)
-      if (user?.role !== "customer") {
-        router.push("/login");
-      }
-    }
-  }, [user, userLoading, router]);
-
-  if (userLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-br from-green-50 to-emerald-100">
-        <div className="p-8 bg-white rounded-2xl shadow-xl flex flex-col items-center text-center">
-
-
-          {/* Logo (opsional, bisa ditampilkan atau tidak) */}
-          <div className="h-24 w-24 mt-6 opacity-50">
-            <img src="/images/logo.png" alt="logo" className="w-full h-full object-contain" />
-          </div>
-        </div>
-      </div>
-    );
-  }
   return (
     <div className="min-h-screen text-gray-700 bg-linear-to-b from-[#FFDD9E] to-[#FFF5E6]">
-      {/* Navbar */}
       <Navbar />
-
-
       <div className="bg-[#9C633D] w-full pt-16 text-gray-700">
         <div className="max-w-7xl mx-auto">
-          {/* Hero Section */}
+          {/* Komponen di atas fold (langsung dimuat) */}
           <HeroSection />
-
-          {/* Features */}
           <FeaturesSection />
-
-          {/* How to Order Section */}
           <PaymentStep />
 
-          {/* Menu Sections */}
-          <FavoriteMenu />
-          <AllMenu />
-
-          {/* Other Sections */}
-          <TestimonialsSection />
-          <FAQSection />
-          {/* <ContactSection /> */}
-          <GallerySection />
+          {/* Komponen di bawah fold (dimuat saat scroll) */}
+          {/* Kita passing fungsi import() ke props componentImport */}
+          <LazySection componentImport={() => import("@/components/home/favoriteMenu")} />
+          <LazySection componentImport={() => import("@/components/home/allMenu")} />
+          <LazySection componentImport={() => import("@/components/home/FAQSection")} />
+          <LazySection componentImport={() => import("@/components/home/gallerySection")} />
         </div>
       </div>
-
-      {/* Footer */}
       <Footer />
     </div>
   );

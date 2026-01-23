@@ -14,6 +14,9 @@ import {
   FaSignOutAlt,
   FaChevronDown,
   FaUserCircle,
+  FaImage,
+  FaSignInAlt,
+  FaUserPlus,
 } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -30,8 +33,8 @@ const navigationData = [
   { href: "#features", icon: <FaStar className="mr-2" />, text: "Fitur" },
   { href: "#menu", icon: <FaUtensils className="mr-2" />, text: "Menu" },
   { href: "#how-to-order", icon: <FaQrcode className="mr-2" />, text: "Cara Pesan" },
-  { href: "#testimonials", icon: <FaStar className="mr-2" />, text: "Testimoni" },
   { href: "#faq", icon: <FaQuestionCircle className="mr-2" />, text: "FAQ" },
+  { href: "#gallery", icon: <FaImage className="mr-2" />, text: "Galeri" },
 ];
 
 const wartegInfo = { name: "Dapur Umi" };
@@ -46,7 +49,7 @@ export default function Navbar() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false); // <-- state profile panel
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { userDetail, getUserDetail } = useUsers();
@@ -85,6 +88,10 @@ export default function Navbar() {
   }, []);
 
   const toggleCheckout = () => {
+    if (!userId) {
+      router.push("/login");
+      return;
+    }
     setIsCheckoutOpen(prev => !prev);
     setIsOrdersOpen(false);
     setIsProfileOpen(false);
@@ -118,9 +125,12 @@ export default function Navbar() {
     router.push("/login");
   };
 
-  const handleNavigate = (path: string) => {
-    router.push(path);
-    setIsDropdownOpen(false);
+  const handleLogin = () => {
+    router.push("/login");
+  };
+
+  const handleRegister = () => {
+    router.push("/register");
   };
 
   return (
@@ -163,7 +173,7 @@ export default function Navbar() {
               whileTap={{ scale: 0.9 }}
             >
               <FaShoppingCart className="text-2xl" />
-              {cart.totalItems > 0 && (
+              {userId && cart.totalItems > 0 && (
                 <motion.span
                   className="absolute top-0 right-0 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
                   initial={{ scale: 0 }}
@@ -175,75 +185,98 @@ export default function Navbar() {
               )}
             </motion.button>
 
-            <div className="relative" ref={dropdownRef}>
-              <motion.div
-                className="flex items-center space-x-2 cursor-pointer"
-                onClick={toggleDropdown}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-300">
-                  {userDetail?.avatar ? (
-                    <Image
-                      src={userDetail.avatar}
-                      alt="Admin"
-                      height={40}
-                      width={40}
-                      className="object-cover h-full w-full"
-                      unoptimized
-                    />
-                  ) : (
-                    <FaUserCircle className="w-8 h-8 text-gray-400" />
+            {userId ? (
+              // User is logged in - show user dropdown
+              <div className="relative" ref={dropdownRef}>
+                <motion.div
+                  className="flex items-center space-x-2 cursor-pointer"
+                  onClick={toggleDropdown}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-300">
+                    {userDetail?.avatar ? (
+                      <Image
+                        src={userDetail.avatar}
+                        alt="Admin"
+                        height={40}
+                        width={40}
+                        className="object-cover h-full w-full"
+                        unoptimized
+                      />
+                    ) : (
+                      <FaUserCircle className="w-8 h-8 text-gray-400" />
+                    )}
+                  </div>
+                  <FaChevronDown className="text-xs text-gray-600" />
+                </motion.div>
+
+                <AnimatePresence>
+                  {isDropdownOpen && (
+                    <motion.div
+                      className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50"
+                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="text-sm font-medium text-gray-900 capitalize">{userDetail?.firstName} {userDetail?.lastName}</p>
+                        <p className="text-xs text-gray-500 truncate">{user?.email || "user@example.com"}</p>
+                      </div>
+
+                      <button
+                        onClick={toggleProfile}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      >
+                        <FaUser className="mr-2" /> Profile
+                      </button>
+
+                      <button
+                        onClick={toggleOrders}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      >
+                        <FaShoppingBag className="mr-2" /> Pesanan
+                      </button>
+
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center border-t border-gray-100"
+                      >
+                        <FaSignOutAlt className="mr-2" /> Keluar
+                      </button>
+                    </motion.div>
                   )}
-                </div>
-                <FaChevronDown className="text-xs text-gray-600" />
-              </motion.div>
-
-              <AnimatePresence>
-                {isDropdownOpen && (
-                  <motion.div
-                    className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50"
-                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900 capitalize">{userDetail?.firstName} {userDetail?.lastName}</p>
-                      <p className="text-xs text-gray-500 truncate">{user?.email || "user@example.com"}</p>
-                    </div>
-
-                    <button
-                      onClick={toggleProfile} // <-- buka UserProfile panel
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                    >
-                      <FaUser className="mr-2" /> Profile
-                    </button>
-
-                    <button
-                      onClick={toggleOrders}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                    >
-                      <FaShoppingBag className="mr-2" /> Pesanan
-                    </button>
-
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center border-t border-gray-100"
-                    >
-                      <FaSignOutAlt className="mr-2" /> Keluar
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                </AnimatePresence>
+              </div>
+            ) : (
+              // User is not logged in - show login and register buttons
+              <div className="flex items-center space-x-2">
+                <motion.button
+                  onClick={handleLogin}
+                  className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <FaSignInAlt className="mr-2" /> Masuk
+                </motion.button>
+                <motion.button
+                  onClick={handleRegister}
+                  className="flex items-center px-3 py-2 text-sm font-medium text-white bg-orange-500 border border-transparent rounded-md hover:bg-orange-600 transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <FaUserPlus className="mr-2" /> Daftar
+                </motion.button>
+              </div>
+            )}
           </div>
         </div>
       </motion.nav>
 
       {/* Checkout Panel */}
       <AnimatePresence>
-        {isCheckoutOpen && (
+        {isCheckoutOpen && userId && (
           <motion.div
             className="fixed top-16 right-0 z-60 w-full md:w-96 bg-white scrollbar-hide shadow-xl overflow-y-auto"
             initial={{ x: "100%", opacity: 0 }}
@@ -258,7 +291,7 @@ export default function Navbar() {
 
       {/* Orders Panel */}
       <AnimatePresence>
-        {isOrdersOpen && (
+        {isOrdersOpen && userId && (
           <motion.div
             className="fixed top-16 right-0 z-60 w-full md:w-96 bg-white scrollbar-hide shadow-xl overflow-y-auto"
             initial={{ x: "100%", opacity: 0 }}
@@ -271,9 +304,9 @@ export default function Navbar() {
         )}
       </AnimatePresence>
 
-        {/* UserProfile Panel */}
+      {/* UserProfile Panel */}
       <AnimatePresence>
-        {isProfileOpen && (
+        {isProfileOpen && userId && (
           <motion.div
             className="fixed top-16 right-0 z-60 w-full md:w-96 bg-white scrollbar-hide shadow-xl overflow-y-auto"
             initial={{ x: "100%", opacity: 0 }}
@@ -285,9 +318,6 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-
-     
-     
     </>
   );
 }

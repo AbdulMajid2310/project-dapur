@@ -5,13 +5,11 @@ interface FailedQueueItem {
   reject: (reason?: any) => void;
 }
 
-const axiosInstance: AxiosInstance = axios.create({
+const axiosInstance = axios.create({
   baseURL: 'http://localhost:7000/api',
   withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
+
 
 let isRefreshing = false;
 let failedQueue: FailedQueueItem[] = [];

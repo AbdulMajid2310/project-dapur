@@ -87,8 +87,8 @@ const OrderCustomerComponent: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [isTestimonialOpen, setIsTestimonialOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState("");
+  const [selectedOrderItemId, setSelectedOrderItemId] = useState("");
   const [selectedItemId, setSelectedItemId] = useState("");
-  const [selectedItemsId, setSelectedItemsId] = useState("");
   const [isCancelling, setIsCancelling] = useState<string | null>(null);
 
   const filteredOrders = activeFilter === 'ALL'
@@ -106,10 +106,10 @@ const OrderCustomerComponent: React.FC = () => {
 
   if (!isModalOpen) return null;
 
-  const handleOpenTestimonial = (orderId: string, itemId: string, menuItemId: string) => {
+  const handleOpenTestimonial = (orderId: string, orderItemId: string, menuItemId: string) => {
     setSelectedOrderId(orderId);
-    setSelectedItemId(itemId);
-    setSelectedItemsId(menuItemId);
+    setSelectedOrderItemId(orderItemId);
+    setSelectedItemId(menuItemId);
     setIsTestimonialOpen(true);
   };
 
@@ -187,7 +187,7 @@ const OrderCustomerComponent: React.FC = () => {
                 animate={{ scale: 1, opacity: 1 }} 
                 exit={{ scale: 0.9, opacity: 0 }}
               >
-                <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div className=" rounded-2xl  overflow-hidden">
                   <div className="bg-linear-to-r from-blue-600 to-blue-500 text-white p-6">
                     <div className="flex justify-between items-start">
                       <div>
@@ -205,10 +205,10 @@ const OrderCustomerComponent: React.FC = () => {
                     </div>
                   </div>
                   <CreateTestimonialSection 
-                    menuId={selectedItemId} 
+                    orderItemId={selectedOrderItemId} 
                     orderId={selectedOrderId} 
                     onClose={() => setIsTestimonialOpen(false)} 
-                    itemId={selectedItemsId} 
+                    menuItemId={selectedItemId} 
                   />
                 </div>
               </motion.div>
@@ -286,8 +286,8 @@ const OrderCustomerComponent: React.FC = () => {
                               Detail Pesanan
                             </h4>
                             <ul className="space-y-3">
-                              {order.items.map((item) => (
-                                <li key={item.id} className="flex items-center justify-between">
+                              {order.items.map((item, index) => (
+                                <li key={index} className="flex items-center justify-between">
                                   <div className="flex items-center flex-1">
                                     <img
                                       src={item.menuItem.image}
@@ -310,14 +310,14 @@ const OrderCustomerComponent: React.FC = () => {
                                     {/* Testimonial Button */}
                                     {isCompleted && (
                                       <div className="mt-2">
-                                        {hasTestimonial(order, item.id) ? (
+                                        {hasTestimonial(order, item.orderItemId) ? (
                                           <div className="flex items-center text-green-600 text-sm">
                                             <FaStar className="mr-1" />
                                             <span>Ulasan diberikan</span>
                                           </div>
                                         ) : (
                                           <button
-                                            onClick={() => handleOpenTestimonial(order.orderId, item.id, item.menuItem.menuItemId)}
+                                            onClick={() => handleOpenTestimonial(order.orderId, item.orderItemId, item.menuItem.menuItemId)}
                                             className="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center"
                                           >
                                             <FaCommentDots className="mr-1" />
