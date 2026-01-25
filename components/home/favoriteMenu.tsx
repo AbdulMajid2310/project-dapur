@@ -6,6 +6,7 @@ import { FaStar, FaPlus, FaChevronRight } from "react-icons/fa";
 import { toast } from "react-toastify";
 import DetailMenu from "../detailProduct";
 import { MenuApiResponse, MenuItem } from "@/lib/hooks/menu/type";
+import { useRouter } from "next/navigation";
 
 
 
@@ -23,6 +24,7 @@ const itemVariants = {
 export default function FavoriteMenu() {
   const { user } = useAuth();
   const userId = user?.userId
+  const router = useRouter()
   const [favoriteMenuData, setFavoriteMenuData] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,6 +76,12 @@ export default function FavoriteMenu() {
 
   // Fungsi untuk menambahkan ke pesanan
   const handleAddToCart = async (menuItemId: string) => {
+    // ❗ JIKA BELUM LOGIN
+  if (!userId) {
+    toast.info("Silakan login terlebih dahulu");
+    router.push("/login");
+    return;
+  }
     try {
       setAddingToCart(menuItemId);
 

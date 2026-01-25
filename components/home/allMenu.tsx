@@ -40,6 +40,7 @@ const containerVariants = {
 
 import { Variants } from "framer-motion";
 import { MenuApiResponse, MenuItem } from "@/lib/hooks/menu/type";
+import { useRouter } from "next/navigation";
 
 const itemVariants: Variants = {
   hidden: {
@@ -74,9 +75,8 @@ const itemVariants: Variants = {
 export default function AllMenu() {
   const { user } = useAuth();
   const userId = user?.userId;
-
+ const router = useRouter();
   const [allMenuData, setAllMenuData] = useState<MenuItem[]>([]);
-  console.log('menuall', allMenuData)
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -149,21 +149,29 @@ export default function AllMenu() {
   /* =====================
      ADD TO CART
   ===================== */
-  const handleAddToCart = async (menuItemId: string) => {
-    try {
-      setAddingToCart(menuItemId);
-      await axiosInstance.post("/cart/add", {
-        userId,
-        menuItemId,
-        quantity: 1,
-      });
-      toast.success("Berhasil menambahkan ke pesanan");
-    } catch {
-      toast.error("Gagal menambahkan ke pesanan");
-    } finally {
-      setAddingToCart(null);
-    }
-  };
+ const handleAddToCart = async (menuItemId: string) => {
+  // ❗ JIKA BELUM LOGIN
+  if (!userId) {
+    toast.info("Silakan login terlebih dahulu");
+    router.push("/login");
+    return;
+  }
+
+  try {
+    setAddingToCart(menuItemId);
+    await axiosInstance.post("/cart/add", {
+      userId,
+      menuItemId,
+      quantity: 1,
+    });
+    toast.success("Berhasil menambahkan ke pesanan");
+  } catch {
+    toast.error("Gagal menambahkan ke pesanan");
+  } finally {
+    setAddingToCart(null);
+  }
+};
+
 
   if (isLoading)
     return <p className="text-center text-white py-20">Loading menu...</p>;
