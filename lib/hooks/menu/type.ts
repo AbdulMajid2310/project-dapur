@@ -11,7 +11,7 @@ export interface MenuItem {
   isAvailable: boolean;
   stock: number;
   orderCount: number;
-  rating: number | null;
+  rating: string | null;
   reviewCount: number;
   allergens: string | null;
   isActive: boolean;

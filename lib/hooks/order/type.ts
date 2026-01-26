@@ -1,25 +1,11 @@
+import { MenuItem } from "../menu/type";
 import { TestimonialData } from "../testimonial/type";
+import { UserData } from "../user/type";
 
 // Tipe data untuk respons dari API
 export interface OrderItem {
   orderItemId: string;
-  menuItem: {
-    menuItemId: string;
-    name: string;
-    description: string;
-    price: string;
-    image: string;
-    isAvailable: boolean;
-    isFavorite: boolean;
-    stock: number;
-    orderCount: number;
-    rating: number | null;
-    reviewCount: number;
-    allergens: string | null;
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-  };
+  menuItem:MenuItem;
   quantity: number;
   priceAtPurchase: string;
   subtotal: string;
@@ -39,20 +25,7 @@ export interface Order {
     notes: string;
     createdAt: string;
     updatedAt: string;
-    user: {
-      userId: string;
-      email: string;
-      password: string;
-      refreshToken: string;
-      firstName: string;
-      lastName: string;
-      phone: string;
-      isActive: boolean;
-      role: string;
-      avatar: string;
-      createdAt: string;
-      updatedAt: string;
-    };
+    user: UserData
   };
   paymentMethod: {
     paymentMethodId: string;

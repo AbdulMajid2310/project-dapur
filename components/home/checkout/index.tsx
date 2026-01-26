@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaTimes } from "react-icons/fa";
@@ -13,7 +11,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 export default function CheckoutCard() {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
-const {  user } = useAuth();
+  const { user } = useAuth();
   // ======= STATE UTAMA =======
   const [selectedCartIds, setSelectedCartIds] = useState<string[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
@@ -27,6 +25,21 @@ const {  user } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
 
+  // ======= LOGIKA UNTUK MENONAKTIFKAN TOMBOL =======
+
+  // 1. Logika untuk tombol "Lanjut"
+  const isNextDisabled = 
+    (currentStep === 1 && selectedCartIds.length === 0) || // Nonaktif di Step 1 jika belum ada item yang dipilih
+    (currentStep === 2 && deliveryOption === 'delivery' && !selectedAddress); // Nonaktif di Step 2 jika delivery dan belum ada alamat
+
+  // 2. Logika untuk tombol "Buat Pesanan"
+  const isSubmitDisabled =
+    isLoading ||
+    selectedCartIds.length === 0 ||
+    (deliveryOption === "delivery" && !selectedAddress) ||
+    !selectedPaymentMethodId ||
+    !paymentProof; // Tambahkan syarat bukti pembayaran
+
   // ======= HANDLERS =======
   const handleSelectedCart = (ids: string[]) => {
     setSelectedCartIds(ids);
@@ -39,13 +52,13 @@ const {  user } = useAuth();
 
     // VALIDASI TIPE FILE
     if (!file.type.startsWith("image/")) {
-      alert("Harap upload file gambar (JPG/PNG)");
+      toast.error("Harap upload file gambar (JPG/PNG)");
       return;
     }
 
     // VALIDASI UKURAN (maks 2MB)
     if (file.size > 2 * 1024 * 1024) {
-      alert("Ukuran file maksimal 2MB");
+      toast.error("Ukuran file maksimal 2MB");
       return;
     }
 
@@ -82,7 +95,6 @@ const {  user } = useAuth();
       const orderRes = await axiosInstance.post("/orders", orderPayload);
       const orderId = orderRes.data.data.orderId;
 
-
       // 2️⃣ UPLOAD PAYMENT PROOF (JIKA ADA)
       if (paymentProof) {
         const formData = new FormData();
@@ -99,29 +111,18 @@ const {  user } = useAuth();
         );
       }
 
-      toast("Pesanan berhasil dibuat!");
+      toast.success("Pesanan berhasil dibuat!");
       resetCheckoutState();
       setIsModalOpen(false);
     } catch (err: any) {
       console.error("❌ Error create order:", err);
-
-      if (err.response) {
-        console.error("Server response:", err.response.data);
-      }
-
-      alert(err.response?.data?.message || "Gagal membuat pesanan");
+      toast.error(err.response?.data?.message || "Gagal membuat pesanan");
     } finally {
       setIsLoading(false);
     }
   };
 
   if (!isModalOpen) return null;
-
-  const isSubmitDisabled =
-    isLoading ||
-    selectedCartIds.length === 0 ||
-    (deliveryOption === "delivery" && !selectedAddress) ||
-    !selectedPaymentMethodId;
 
   return (
     <AnimatePresence>
@@ -131,7 +132,7 @@ const {  user } = useAuth();
           {/* HEADER */}
           <div className="flex justify-between items-center p-4 border-b">
             <h3 className="text-xl font-bold">Checkout</h3>
-            <button onClick={() => setIsModalOpen(false)}>
+            <button onClick={() => setIsModalOpen(false)} className="p-1 hover:bg-gray-100 rounded">
               <FaTimes />
             </button>
           </div>
@@ -162,14 +163,14 @@ const {  user } = useAuth();
                       alt="Bukti pembayaran"
                     />
                   ) : (
-                    <p>Pilih file bukti pembayaran</p>
+                    <p className="text-gray-500">Upload bukti pembayaran (JPG/PNG, maks. 2MB)</p>
                   )}
 
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="mt-2 px-4 py-2 bg-orange-500 text-white rounded"
+                    className="mt-2 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors"
                   >
-                    Pilih File
+                    {paymentProofPreview ? "Ganti File" : "Pilih File"}
                   </button>
 
                   <input
@@ -189,7 +190,7 @@ const {  user } = useAuth();
             {currentStep > 1 && (
               <button
                 onClick={() => setCurrentStep(currentStep - 1)}
-                className="px-4 py-2 border border-gray-300 rounded"
+                className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
               >
                 Kembali
               </button>
@@ -198,15 +199,18 @@ const {  user } = useAuth();
             {currentStep < 3 ? (
               <button
                 onClick={() => setCurrentStep(currentStep + 1)}
-                className="bg-orange-500 text-white px-4 py-2 rounded ml-auto"
+                className={`bg-orange-500 text-white px-4 py-2 rounded ml-auto transition-opacity ${
+                  isNextDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-orange-600"
+                }`}
+                disabled={isNextDisabled}
               >
                 Lanjut
               </button>
             ) : (
               <button
                 onClick={createOrder}
-                className={`bg-orange-500 text-white px-4 py-2 rounded ml-auto ${
-                  isSubmitDisabled ? "opacity-50 cursor-not-allowed" : ""
+                className={`bg-orange-500 text-white px-4 py-2 rounded ml-auto transition-opacity ${
+                  isSubmitDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-orange-600"
                 }`}
                 disabled={isSubmitDisabled}
               >
