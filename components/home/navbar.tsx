@@ -122,7 +122,7 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     toast.success("Anda telah berhasil keluar");
-    router.push("/login");
+    router.push("/");
   };
 
   const handleLogin = () => {

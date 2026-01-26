@@ -49,7 +49,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
     useEffect(() => {
         if (!userLoading && (!user || user.role !== "admin")) {
-            router.push("/login");
+            router.push("/");
         }
     }, [user, userLoading]);
 
@@ -135,7 +135,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     /* ===================== HANDLER ===================== */
     const handleLogout = async () => {
         await logout();
-        router.push("/login");
+        router.push("/");
     };
 
     /* ===================== RENDER ===================== */

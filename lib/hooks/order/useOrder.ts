@@ -97,6 +97,7 @@ export const useCustomerOrders = (options?: UseCustomerOrdersOptions) => {
 
   return {
     orders,
+    setOrders,
     loading,
     deleting,
     deleteOrder, // 🔥 expose delete function

@@ -58,7 +58,7 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError);
         console.error('Refresh token failed, redirecting to login.');
-        window.location.href = '/login';
+        window.location.href = '/';
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

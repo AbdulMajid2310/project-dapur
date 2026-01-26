@@ -17,6 +17,7 @@ import {
 } from 'react-icons/fa';
 import { FiPackage } from 'react-icons/fi';
 import CreateTestimonialSection from '../testimonials/createTestimonials';
+import axiosInstance from '@/lib/axiosInstance';
 
 const getStatusStyle = (status: string) => {
   switch (status) {
@@ -82,7 +83,7 @@ const filterOptions = [
 ];
 
 const OrderCustomerComponent: React.FC = () => {
-  const { orders, loading, deleteOrder } = useCustomerOrders();
+  const { orders, loading, setOrders } = useCustomerOrders();
   const [activeFilter, setActiveFilter] = useState<string>('ALL');
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [isTestimonialOpen, setIsTestimonialOpen] = useState(false);
@@ -113,18 +114,32 @@ const OrderCustomerComponent: React.FC = () => {
     setIsTestimonialOpen(true);
   };
 
-  const handleCancelOrder = async (orderId: string) => {
-  
-    setIsCancelling(orderId);
-    try {
-      await deleteOrder(orderId);
-      // Success notification would be handled by the hook
-    } catch (error) {
-      console.error("Failed to cancel order:", error);
-    } finally {
-      setIsCancelling(null);
-    }
-  };
+const handleCancelOrder = async (orderId: string) => {
+  setIsCancelling(orderId);
+
+  try {
+    await axiosInstance.put(`/orders/${orderId}/verify`, {
+      status: "CANCELLED",
+    });
+
+    // ✅ UPDATE STATE LANGSUNG (REAL-TIME)
+    setOrders((prevOrders: any[]) =>
+      prevOrders.map(order =>
+        order.orderId === orderId
+          ? { ...order, status: "CANCELLED" }
+          : order
+      )
+    );
+
+  } catch (error) {
+    console.error("Failed to cancel order:", error);
+  } finally {
+    setIsCancelling(null);
+  }
+};
+
+
+
 
   const canCancelOrder = (status: string) => {
     return status === 'PENDING_PAYMENT' || status === 'WAITING_VERIFICATION';
