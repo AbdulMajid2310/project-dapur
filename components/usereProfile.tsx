@@ -24,6 +24,7 @@ interface UserResponse {
 export default function UserProfile() {
   const { user } = useAuth();
   const userId = user?.userId;
+  console.log("data user", user)
 
   const [userData, setUserData] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -74,6 +75,7 @@ export default function UserProfile() {
       formData.append("lastName", lastName);
       formData.append("phone", phone);
       formData.append("email", email);
+       formData.append("role", user?.role || "");
       
       if (avatarFile) formData.append("avatar", avatarFile);
 

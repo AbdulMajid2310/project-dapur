@@ -148,7 +148,7 @@ export default function Navbar() {
             <div className="w-10 h-10 flex items-center justify-center">
               <img src="/images/logo.png" alt="logo" className="w-full h-full object-contain" />
             </div>
-            <span className="text-xl font-satisfy font-bold text-gray-800">{wartegInfo.name}</span>
+            <span className="text-xl font-satisfy font-bold capitalize text-gray-800">{wartegInfo.name}</span>
           </motion.div>
 
           <div className="md:flex hidden space-x-8">

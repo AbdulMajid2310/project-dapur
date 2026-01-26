@@ -114,8 +114,7 @@ const OrderCustomerComponent: React.FC = () => {
   };
 
   const handleCancelOrder = async (orderId: string) => {
-    if (!window.confirm("Apakah Anda yakin ingin membatalkan pesanan ini?")) return;
-    
+  
     setIsCancelling(orderId);
     try {
       await deleteOrder(orderId);
